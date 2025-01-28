@@ -1,1 +1,1 @@
-# Ecolyzer
+# Ecolyzer App
