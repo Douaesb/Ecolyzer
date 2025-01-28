@@ -1,0 +1,7 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://mongodb:27017/ecolyzer_prod
+logging:
+  level:
+    org.springframework.data.mongodb: DEBUG
