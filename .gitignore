@@ -1,33 +1,61 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# ecolyzer_frontend (Angular) specific ignores
+/ecolyzer_frontend/dist
+/ecolyzer_frontend/tmp
+/ecolyzer_frontend/out-tsc
+/ecolyzer_frontend/.angular/cache
+/ecolyzer_frontend/node_modules
+/ecolyzer_frontend/npm-debug.log
+/ecolyzer_frontend/yarn-error.log
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# ecolyzer_backend (Spring) specific ignores
+/ecolyzer_backend/target
+/ecolyzer_backend/build
+/ecolyzer_backend/.mvn/
+!ecolyzer_backend/.mvn/wrapper/maven-wrapper.jar
+/ecolyzer_backend/nbproject/private/
+/ecolyzer_backend/nbbuild/
+/ecolyzer_backend/dist/
+/ecolyzer_backend/nbdist/
+/ecolyzer_backend/.nb-gradle/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# IDEs and editors
+/ecolyzer_frontend/.idea/
+/ecolyzer_frontend/.project
+/ecolyzer_frontend/.classpath
+/ecolyzer_frontend/.settings/
+.ecolyzer_frontend/*.launch
+/ecolyzer_frontend/*.sublime-workspace
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+/ecolyzer_backend/.idea/
+/ecolyzer_backend/.project
+/ecolyzer_backend/.classpath
+/ecolyzer_backend/.settings/
+/ecolyzer_backend/*.launch
+/ecolyzer_backend/*.sublime-workspace
 
-### VS Code ###
-.vscode/
+# Visual Studio Code (for both ecolyzer_frontend and ecolyzer_backend)
+**/.vscode/
+!**/.vscode/settings.json
+!**/.vscode/tasks.json
+!**/.vscode/launch.json
+!**/.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+/ecolyzer_frontend/connect.lock
+/ecolyzer_frontend/coverage
+/ecolyzer_frontend/libpeerconnection.log
+/ecolyzer_frontend/testem.log
+/ecolyzer_frontend/typings
+
+# System files (applies to both)
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*.lock
+*.pid
