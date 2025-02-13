@@ -6,10 +6,11 @@ import com.ecolyzer.ecolyzer_backend.service.ZoneService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/zones")
+@RequestMapping("/api")
 public class ZoneController {
 
     private final ZoneService zoneService;
@@ -19,27 +20,32 @@ public class ZoneController {
         this.zoneService = zoneService;
     }
 
-    @GetMapping
+    @GetMapping({"/user/zones", "/admin/zones"})
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public Page<ZoneResponseDTO> getAllZones(@RequestParam int page, @RequestParam int size) {
         return zoneService.getAllZones(page, size);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping({"/user/zones/{id}", "/admin/zones/{id}"})
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ZoneResponseDTO getZoneById(@PathVariable String id) {
         return zoneService.getZoneById(id);
     }
 
-    @PostMapping
+    @PostMapping("/admin/zones")
+    @PreAuthorize("hasRole('ADMIN')")
     public ZoneResponseDTO createZone(@Valid @RequestBody ZoneRequestDTO dto) {
         return zoneService.addZone(dto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/admin/zones/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ZoneResponseDTO updateZone(@PathVariable String id, @Valid @RequestBody ZoneRequestDTO dto) {
         return zoneService.updateZone(id, dto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/zones/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteZone(@PathVariable String id) {
         zoneService.deleteZone(id);
     }
