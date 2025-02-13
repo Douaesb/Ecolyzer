@@ -1,4 +1,13 @@
 spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        auto-startup: true
+    virtual-host: /
   profiles:
     active: dev
   autoconfigure:
