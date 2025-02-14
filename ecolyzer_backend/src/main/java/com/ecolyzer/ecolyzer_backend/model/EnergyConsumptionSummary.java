@@ -8,14 +8,16 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+
+
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "energy_consumption")
-public class EnergyConsumption {
+@Document(collection = "energy_consumption_summary")
+public class EnergyConsumptionSummary {
 
     @Id
     private String id;
@@ -23,15 +25,7 @@ public class EnergyConsumption {
     @DBRef
     private Device device;
 
-    private Double totalConsumption; // kWh
+    private LocalDate date;
 
-    private LocalDateTime timestamp;
-
-    public void addConsumption(Double value) {
-        if (this.totalConsumption == null) {
-            this.totalConsumption = 0.0;
-        }
-        this.totalConsumption += value;
-        this.timestamp = LocalDateTime.now();
-    }
+    private Double totalEnergyConsumption;
 }

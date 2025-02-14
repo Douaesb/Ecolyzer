@@ -1,9 +1,7 @@
 package com.ecolyzer.ecolyzer_backend.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,5 +21,7 @@ public class Capteur {
     private SensorType type;
 
     @DBRef
+    @ToString.Exclude
+    @JsonIgnore
     private Device device;
 }

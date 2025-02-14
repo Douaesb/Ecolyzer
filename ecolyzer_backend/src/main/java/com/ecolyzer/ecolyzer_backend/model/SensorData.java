@@ -29,6 +29,8 @@ public class SensorData implements Serializable {
 
     private SensorType type; // Type de capteur à l'origine de la donnée
 
+    private boolean processed = false;
+
     @DBRef
     private Capteur capteur;
 
