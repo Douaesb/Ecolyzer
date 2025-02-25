@@ -20,6 +20,7 @@ public class Device {
     private String id;
     private String name;
     private Integer serialNum;
+    private Double energyThreshold;
 
     @DBRef
     private Zone zone;

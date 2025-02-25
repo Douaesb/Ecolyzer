@@ -3,6 +3,7 @@ package com.ecolyzer.ecolyzer_backend.exception;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentTypeMismatchException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -52,6 +53,12 @@ public class GlobalExceptionHandler {
                 errors.put(violation.getPropertyPath().toString(), violation.getMessage()));
         return errors;
     }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> handleEnumException(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.badRequest().body("Invalid status value. Allowed values: UNRESOLVED, RESOLVING, RESOLVED");
+    }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

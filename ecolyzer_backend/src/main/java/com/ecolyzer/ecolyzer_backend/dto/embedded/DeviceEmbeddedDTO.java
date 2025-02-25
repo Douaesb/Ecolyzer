@@ -7,4 +7,5 @@ public class DeviceEmbeddedDTO {
     private String id;
     private String name;
     private Integer serialNum;
+    private Double energyThreshold;
 }

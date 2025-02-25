@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ZoneRepository extends MongoRepository<Zone, String> {
@@ -18,5 +19,8 @@ public interface ZoneRepository extends MongoRepository<Zone, String> {
             "{ $limit: ?1 }"
     })
     List<Zone> findAllZonesWithDevices(int skip, int limit);
+
+    Optional<Zone> findByName(String name);
+
 
 }

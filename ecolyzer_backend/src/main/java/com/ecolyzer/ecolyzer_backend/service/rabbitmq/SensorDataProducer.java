@@ -48,7 +48,7 @@ public class SensorDataProducer {
                 .timestamp(Instant.now())
                 .type(capteur.getType())
                 .capteur(capteur)
-                .build();
+                .processed(false).build();
 
         logger.info("📡 Sending message to RabbitMQ: {}", data);
         rabbitTemplate.convertAndSend(SENSOR_EXCHANGE, SENSOR_ROUTING_KEY, data);

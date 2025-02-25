@@ -1,5 +1,6 @@
 package com.ecolyzer.ecolyzer_backend.model;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,25 +9,22 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
-
-
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "energy_consumption_summary")
-public class EnergyConsumptionSummary {
+@Document(collection = "status_changes")
+public class StatusChange {
 
     @Id
     private String id;
 
     @DBRef
-    private Device device;
+    private ThresholdAlert thresholdAlert;
 
-    private LocalDate date;
+    private AlertStatus status;
 
-    private Double totalEnergyConsumption;
-    private int alertCount;
+    private LocalDateTime changedAt;
 }

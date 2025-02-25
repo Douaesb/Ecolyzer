@@ -3,30 +3,39 @@ package com.ecolyzer.ecolyzer_backend.service.impl;
 import com.ecolyzer.ecolyzer_backend.dto.request.DeviceRequestDTO;
 import com.ecolyzer.ecolyzer_backend.dto.response.DeviceResponseDTO;
 import com.ecolyzer.ecolyzer_backend.mapper.DeviceMapper;
+import com.ecolyzer.ecolyzer_backend.model.Capteur;
 import com.ecolyzer.ecolyzer_backend.model.Device;
+import com.ecolyzer.ecolyzer_backend.model.SensorType;
+import com.ecolyzer.ecolyzer_backend.repository.CapteurRepository;
 import com.ecolyzer.ecolyzer_backend.repository.DeviceRepository;
 import com.ecolyzer.ecolyzer_backend.repository.ZoneRepository;
 import com.ecolyzer.ecolyzer_backend.service.DeviceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class DeviceServiceImpl implements DeviceService {
 
     private final DeviceRepository deviceRepository;
     private final ZoneRepository zoneRepository;
     private final DeviceMapper deviceMapper;
 
+    private final CapteurRepository capteurRepository;
+
     @Autowired
-    public DeviceServiceImpl(DeviceRepository deviceRepository, ZoneRepository zoneRepository, DeviceMapper deviceMapper) {
+    public DeviceServiceImpl(DeviceRepository deviceRepository, ZoneRepository zoneRepository, DeviceMapper deviceMapper, CapteurRepository capteurRepository) {
         this.deviceRepository = deviceRepository;
         this.zoneRepository = zoneRepository;
         this.deviceMapper = deviceMapper;
+        this.capteurRepository = capteurRepository;
     }
 
     @Override
@@ -47,11 +56,28 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     @Override
+    @Transactional
     public DeviceResponseDTO createDevice(DeviceRequestDTO dto) {
         Device device = deviceMapper.toDevice(dto);
         device.setZone(zoneRepository.findById(dto.getZoneId()).orElseThrow());
+        device.setEnergyThreshold(dto.getEnergyThreshold());
         Device savedDevice = deviceRepository.save(device);
-        return deviceMapper.toResponseDTO(savedDevice);
+        List<Capteur> capteurs = List.of(
+                new Capteur(null, "Capteur de Température", SensorType.TEMPERATURE, savedDevice),
+                new Capteur(null, "Capteur d'Énergie", SensorType.ENERGY, savedDevice),
+                new Capteur(null, "Capteur d'Humidité", SensorType.HUMIDITY, savedDevice)
+        );
+        List<Capteur> savedCapteurs = capteurRepository.saveAll(capteurs);
+
+        savedDevice.setCapteurs(savedCapteurs);
+        deviceRepository.save(savedDevice);
+
+        log.info("✅ New device '{}' created with energyThreshold {} and default sensors.",
+                savedDevice.getName(), savedDevice.getEnergyThreshold());
+
+        Device updatedDevice = deviceRepository.findById(savedDevice.getId()).orElseThrow();
+
+        return deviceMapper.toResponseDTO(updatedDevice);
     }
 
     @Override
@@ -59,6 +85,7 @@ public class DeviceServiceImpl implements DeviceService {
         Device existingDevice = deviceRepository.findById(id).orElseThrow();
         existingDevice.setName(dto.getName());
         existingDevice.setSerialNum(dto.getSerialNum());
+        existingDevice.setEnergyThreshold(dto.getEnergyThreshold());
         existingDevice.setZone(zoneRepository.findById(dto.getZoneId()).orElseThrow());
         Device updatedDevice = deviceRepository.save(existingDevice);
         return deviceMapper.toResponseDTO(updatedDevice);

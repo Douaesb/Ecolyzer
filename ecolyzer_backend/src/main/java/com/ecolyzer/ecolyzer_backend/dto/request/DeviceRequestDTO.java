@@ -20,4 +20,8 @@ public class DeviceRequestDTO {
 
     @NotBlank(message = "Zone ID is required.")
     private String zoneId;
+
+    @NotNull(message = "energyThreshold value is required.")
+    private Double energyThreshold;
+
 }

@@ -11,5 +11,6 @@ public class DeviceResponseDTO {
     private String name;
     private Integer serialNum;
     private String zoneId;
+    private Double energyThreshold;
     private List<CapteurEmbeddedDTO> capteurs;
 }

@@ -25,9 +25,10 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = {CapteurMapper.class})
 public interface DeviceMapper {
 
-        Device toDevice(DeviceRequestDTO dto);
+    Device toDevice(DeviceRequestDTO dto);
 
-    //    @Mapping(source = "zone.id", target = "zoneId")
+    @Mapping(source = "zone.id", target = "zoneId")
     @Mapping(target = "capteurs", source = "capteurs")
+    @Mapping(source = "energyThreshold", target = "energyThreshold")
     DeviceResponseDTO toResponseDTO(Device device);
 }
