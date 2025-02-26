@@ -7,24 +7,30 @@ import { EnergyReportComponent } from './components/reports/energy-report.compon
 import { UserManagementComponent } from './components/users/user-management.component';
 import { RegisterComponent } from './components/auth/register.component';
 import { LoginComponent } from './components/auth/login.component';
+import { AuthLayoutComponent } from './auth-layout.component';
+import { MainLayoutComponent } from './main-layout.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'devices', component: DeviceListComponent },
-  { path: 'zones', component: ZoneListComponent },
-  { path: 'alerts', component: AlertListComponent },
-  { path: 'reports', component: EnergyReportComponent },
+  // { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+
   {
-    path: 'register',
-    component: RegisterComponent,
+    path: '',
+    component: AuthLayoutComponent,
+    children: [
+      { path: 'login', component: LoginComponent },
+      { path: 'register', component: RegisterComponent },
+    ],
   },
   {
-    path: 'login',
-    component: LoginComponent,
-  },
-  {
-    path: 'users',
-    component: UserManagementComponent,
+    path: '',
+    component: MainLayoutComponent,
+    children: [
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'devices', component: DeviceListComponent },
+      { path: 'zones', component: ZoneListComponent },
+      { path: 'alerts', component: AlertListComponent },
+      { path: 'reports', component: EnergyReportComponent },
+      { path: 'users', component: UserManagementComponent },
+    ],
   },
 ];
