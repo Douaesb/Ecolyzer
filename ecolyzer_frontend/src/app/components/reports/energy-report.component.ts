@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { Chart } from 'chart.js/auto';
+import { ArcElement, Chart, DoughnutController } from 'chart.js';
+import { LineController, LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale } from 'chart.js';
+Chart.register(LineController, LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale, DoughnutController, ArcElement);
 
 @Component({
   selector: 'app-energy-report',

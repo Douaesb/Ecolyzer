@@ -5,21 +5,25 @@ import { ZoneListComponent } from './components/zones/zone-list.component';
 import { AlertListComponent } from './components/alerts/alert-list.component';
 import { EnergyReportComponent } from './components/reports/energy-report.component';
 import { UserManagementComponent } from './components/users/user-management.component';
-import { RegisterComponent } from './components/auth/register.component';
-import { LoginComponent } from './components/auth/login.component';
-import { AuthLayoutComponent } from './auth-layout.component';
 import { MainLayoutComponent } from './main-layout.component';
 
 export const routes: Routes = [
   // { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
 
   {
-    path: '',
-    component: AuthLayoutComponent,
+    path: 'auth',
     children: [
-      { path: 'login', component: LoginComponent },
-      { path: 'register', component: RegisterComponent },
-    ],
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./components/auth/login.component').then(m => m.LoginComponent)
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./components/auth/register.component').then(m => m.RegisterComponent)
+      }
+    ]
   },
   {
     path: '',

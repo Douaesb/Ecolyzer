@@ -1,9 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { SidebarComponent } from '../sidebar/sidebar.component';
-import { HeaderComponent } from '../header/header.component';
-import { Chart } from 'chart.js/auto';
+import { Chart } from 'chart.js';
 
 @Component({
   selector: 'app-dashboard',

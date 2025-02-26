@@ -20,7 +20,7 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.login),
       mergeMap(({ credentials }) =>
-        this.authService.login(credentials.username, credentials.password).pipe(
+        this.authService.login(credentials.usernameOrEmail, credentials.password).pipe(
           map((response) => {
             const authorities = Array.isArray(response.authorities) ? response.authorities : [];
             return AuthActions.loginSuccess({
