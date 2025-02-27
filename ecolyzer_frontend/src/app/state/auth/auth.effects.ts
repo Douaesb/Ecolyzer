@@ -35,73 +35,69 @@ export class AuthEffects {
     )
   );
 
-  // REGISTER EFFECT
+  // REGISTER EFFECT (Redirect to Login)
   register$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.register),
       mergeMap(({ credentials }) =>
         this.authService.register(credentials.username, credentials.password, credentials.roles).pipe(
-          map((response) => {
-            const roles = this.extractRoles(response);
-            return AuthActions.registerSuccess({
-              token: response.token,
-              username: response.username,
-              roles
-            });
-          }),
+          map((response) => AuthActions.registerSuccess({
+            token: response.token, 
+            username: response.username, 
+            roles: this.extractRoles(response) 
+          })),
           catchError(error => of(AuthActions.registerFailure({ error: error.error?.message || 'Registration failed' })))
         )
       )
     )
   );
+  
 
   // LOGOUT EFFECT
   logout$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.logout),
-      tap(() => {
-        localStorage.removeItem('token');
-      }),
+      tap(() => localStorage.removeItem('token')),
       map(() => AuthActions.logoutSuccess())
     )
   );
 
-// NAVIGATION AFTER AUTH SUCCESS
-authSuccess$ = createEffect(() =>
-  this.actions$.pipe(
-    ofType(AuthActions.loginSuccess, AuthActions.registerSuccess),
-    tap(action => {
-      localStorage.setItem('token', action.token);
-    }),
-    map(() => AuthActions.authStateUpdated()) // Dispatch an action to signal that auth state has been updated
-  )
-);
+  // **NAVIGATION EFFECTS**
 
-// Trigger navigation only after store update
-navigateAfterAuth$ = createEffect(
-  () =>
-    this.actions$.pipe(
-      ofType(AuthActions.authStateUpdated),
-      tap(() => {
-        this.router.navigate(['/dashboard']);
-      })
-    ),
-  { dispatch: false }
-);
-
-
-  // NAVIGATION AFTER LOGOUT
-  logoutSuccess$ = createEffect(
+  // After login, redirect to dashboard only if roles exist
+  navigateAfterLogin$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(AuthActions.logoutSuccess),
-        tap(() => {
-          this.router.navigate(['/auth/login']);
+        ofType(AuthActions.loginSuccess),
+        tap(({ token, roles }) => {
+          localStorage.setItem('token', token);
+          this.router.navigate(roles.length > 0 ? ['/dashboard'] : ['/auth/login']);
         })
       ),
     { dispatch: false }
   );
 
+  // After register, always redirect to login
+  navigateAfterRegister$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.registerSuccess),
+        tap(() => this.router.navigate(['/auth/login']))
+      ),
+    { dispatch: false }
+  );
+
+  // After logout, redirect to login
+  logoutSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.logoutSuccess),
+        tap(() => this.router.navigate(['/auth/login']))
+      ),
+    { dispatch: false }
+  );
+
+  // Extract roles from the API response
   private extractRoles(response: any): string[] {
     if (Array.isArray(response.roles)) {
       return response.roles.map((role: any) => role.name || role); 

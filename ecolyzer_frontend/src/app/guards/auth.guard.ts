@@ -14,7 +14,6 @@ export const AuthGuard = (requiredRoles: string[] = []) => {
     map(authState => {
       console.log('Auth State in Guard:', authState);
 
-      // 🔹 Check authentication
       if (!authState.isAuthenticated || !authState.token) {
         console.warn('User is not authenticated. Redirecting to login.');
         router.navigate(['/auth/login']);
@@ -26,7 +25,6 @@ export const AuthGuard = (requiredRoles: string[] = []) => {
         const decodedToken: any = jwtDecode(token);
         console.log('Decoded Token:', decodedToken);
 
-        // 🔹 Token expiration check
         const now = Math.floor(Date.now() / 1000);
         if (!decodedToken.exp || decodedToken.exp < now) {
           console.warn('Token expired. Redirecting to login.');
@@ -34,7 +32,6 @@ export const AuthGuard = (requiredRoles: string[] = []) => {
           return false;
         }
 
-        // 🔹 Extract user roles properly
         let userRoles: string[] = [];
 
         if (Array.isArray(decodedToken.roles) && decodedToken.roles.length) {
@@ -47,14 +44,12 @@ export const AuthGuard = (requiredRoles: string[] = []) => {
 
         console.log('Extracted User Roles:', userRoles);
 
-        // 🔹 Ensure user has valid roles or approval status
-        if (!userRoles.length && decodedToken.approved === false) {
-          console.warn('User is not approved yet. Redirecting to login.');
+        if (userRoles.length === 0) {
+          console.warn('User has no roles assigned. Redirecting to login.');
           router.navigate(['/auth/login']);
           return false;
         }
 
-        // 🔹 Role-based access control
         const hasAccess =
           requiredRoles.length === 0 || requiredRoles.some(role => userRoles.includes(role));
 

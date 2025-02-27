@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
+import { select, Store } from '@ngrx/store';
+import { selectAuthUser } from '../../state/auth/auth.selectors';
 
 @Component({
   selector: 'app-header',
@@ -75,7 +78,7 @@ import { CommonModule } from '@angular/common';
                   </div>
                 </button>
                 <span class="ml-3 text-sm font-medium text-gray-700"
-                  >Admin</span
+                  >{{ username$ | async }}</span
                 >
               </div>
             </div>
@@ -85,4 +88,10 @@ import { CommonModule } from '@angular/common';
     </header>
   `,
 })
-export class HeaderComponent {}
+export class HeaderComponent {
+  username$: Observable<string | null>;
+
+  constructor(private store: Store) {
+    this.username$ = this.store.pipe(select(selectAuthUser)); 
+  }
+}
