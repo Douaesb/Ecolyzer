@@ -5,9 +5,12 @@ import com.ecolyzer.ecolyzer_backend.model.User;
 
 import java.util.List;
 
+import org.springframework.security.core.userdetails.UserDetails;
+
 public interface UserService {
     UserRequestDTO register(UserRequestDTO userDTO);
     List<UserRequestDTO> getAllUsers();
     void updateUserRoles(String id, List<String> roles);
-    User loadUserByUsername(String username);
+    // User loadUserByUsername(String username);
+    User loadUserByUsername(String usernameOrEmail);
 }

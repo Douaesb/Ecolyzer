@@ -42,21 +42,14 @@ export class AuthService {
     );
   }
 
-  logout(): Observable<void> {
-    return new Observable<void>((observer) => {
-      localStorage.removeItem('token');
-      observer.next();
-      observer.complete();
-    });
+  logout(): Observable<any> {
+    return this.http.post(
+      `${this.API_URL}/logout`,
+      {},
+      { headers: this.getHeaders(true) } 
+    );
   }
-  
-  // logout(): Observable<any> {
-  //   return this.http.post(
-  //     `${this.apiUrl}/logout`,
-  //     {},
-  //     { headers: this.getHeaders(true) } 
-  //   );
-  // }
+
   getToken(): string | null {
     return localStorage.getItem('token');
   }
