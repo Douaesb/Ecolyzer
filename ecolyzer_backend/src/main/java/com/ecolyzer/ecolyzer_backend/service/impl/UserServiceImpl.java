@@ -13,23 +13,26 @@ import com.ecolyzer.ecolyzer_backend.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
-    private PasswordEncoder passwordEncoder;
-    private UserMapper userMapper;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, 
+                           PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
     }
+
 
     @Override
     public UserRequestDTO register(UserRequestDTO userDTO) {
@@ -40,17 +43,18 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toEntity(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        List<Role> roles = userDTO.getRoles().stream()
-                .map(roleName -> roleRepository.findByName(roleName))
-                .filter(Objects::nonNull)
-                .toList();
+        // List<Role> roles = userDTO.getRoles().stream()
+        //         .map(roleName -> roleRepository.findByName(roleName))
+        //         .filter(Objects::nonNull)
+        //         .toList();
 
-        if (roles.isEmpty()) {
-            throw new RoleNotFoundException("At least one valid role is required (e.g., ROLE_USER or ROLE_ADMIN)");
-        }
+        // if (roles.isEmpty()) {
+        //     throw new RoleNotFoundException("At least one valid role is required (e.g., ROLE_USER or ROLE_ADMIN)");
+        // }
 
-        user.setRoles(roles);
-
+        // user.setRoles(roles);
+        user.setRoles(Collections.emptyList());
+        user.setApproved(false);
         return userMapper.toDTO(userRepository.save(user));
     }
 
@@ -73,6 +77,23 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(usernameOrEmail)
                 .or(() -> userRepository.findByEmail(usernameOrEmail)) 
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + usernameOrEmail));
+    }
+
+    @Override
+    public String approveUser(String id) {
+        User user = userRepository.findById(id).orElseThrow(() -> 
+            new ResourceNotFoundException("User not found"));
+
+        Role userRole = roleRepository.findByName("ROLE_USER");
+        if (userRole == null) {
+            throw new RoleNotFoundException("User role not found");
+        }
+
+        user.setApproved(true);
+        user.setRoles(List.of(userRole));
+        userRepository.save(user);
+
+        return "User approved successfully";
     }
     
 

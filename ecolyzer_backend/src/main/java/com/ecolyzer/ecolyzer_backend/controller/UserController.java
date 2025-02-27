@@ -1,8 +1,9 @@
 package com.ecolyzer.ecolyzer_backend.controller;
 
 import com.ecolyzer.ecolyzer_backend.dto.request.UserRequestDTO;
+import com.ecolyzer.ecolyzer_backend.exception.ResourceNotFoundException;
+import com.ecolyzer.ecolyzer_backend.exception.RoleNotFoundException;
 import com.ecolyzer.ecolyzer_backend.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,5 +33,18 @@ public class UserController {
     public ResponseEntity<Void> updateUserRoles(@PathVariable String id, @RequestBody List<String> roles) {
         userService.updateUserRoles(id, roles);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+   @PutMapping("/approve-user/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> approveUser(@PathVariable String id) {
+        try {
+            String message = userService.approveUser(id);
+            return ResponseEntity.ok(message);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RoleNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 }

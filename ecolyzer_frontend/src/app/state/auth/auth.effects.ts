@@ -22,11 +22,11 @@ export class AuthEffects {
       mergeMap(({ credentials }) =>
         this.authService.login(credentials.usernameOrEmail, credentials.password).pipe(
           map((response) => {
-            const authorities = Array.isArray(response.authorities) ? response.authorities : [];
+            const roles = this.extractRoles(response);
             return AuthActions.loginSuccess({
               token: response.token,
               username: response.username,
-              authorities: authorities.map((auth: any) => auth.authority)
+              roles
             });
           }),
           catchError(error => of(AuthActions.loginFailure({ error: error.error?.message || 'Login failed' })))
@@ -42,11 +42,11 @@ export class AuthEffects {
       mergeMap(({ credentials }) =>
         this.authService.register(credentials.username, credentials.password, credentials.roles).pipe(
           map((response) => {
-            const authorities = Array.isArray(response.authorities) ? response.authorities : [];
+            const roles = this.extractRoles(response);
             return AuthActions.registerSuccess({
               token: response.token,
               username: response.username,
-              authorities: authorities.map((auth: any) => auth.authority)
+              roles
             });
           }),
           catchError(error => of(AuthActions.registerFailure({ error: error.error?.message || 'Registration failed' })))
@@ -66,18 +66,29 @@ export class AuthEffects {
     )
   );
 
-  // NAVIGATION AFTER AUTH SUCCESS
-  authSuccess$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(AuthActions.loginSuccess, AuthActions.registerSuccess),
-        tap(action => {
-          localStorage.setItem('token', action.token);
-          this.router.navigate(['/dashboard']);
-        })
-      ),
-    { dispatch: false }
-  );
+// NAVIGATION AFTER AUTH SUCCESS
+authSuccess$ = createEffect(() =>
+  this.actions$.pipe(
+    ofType(AuthActions.loginSuccess, AuthActions.registerSuccess),
+    tap(action => {
+      localStorage.setItem('token', action.token);
+    }),
+    map(() => AuthActions.authStateUpdated()) // Dispatch an action to signal that auth state has been updated
+  )
+);
+
+// Trigger navigation only after store update
+navigateAfterAuth$ = createEffect(
+  () =>
+    this.actions$.pipe(
+      ofType(AuthActions.authStateUpdated),
+      tap(() => {
+        this.router.navigate(['/dashboard']);
+      })
+    ),
+  { dispatch: false }
+);
+
 
   // NAVIGATION AFTER LOGOUT
   logoutSuccess$ = createEffect(
@@ -90,4 +101,15 @@ export class AuthEffects {
       ),
     { dispatch: false }
   );
+
+  private extractRoles(response: any): string[] {
+    if (Array.isArray(response.roles)) {
+      return response.roles.map((role: any) => role.name || role); 
+    } else if (Array.isArray(response.authorities)) {
+      return response.authorities.map((auth: any) => auth.authority || auth);
+    } else if (typeof response.scope === 'string') {
+      return response.scope.split(' ');
+    }
+    return [];
+  }
 }

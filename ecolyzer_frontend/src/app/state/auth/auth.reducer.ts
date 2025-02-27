@@ -4,7 +4,7 @@ import * as AuthActions from './auth.action';
 export interface AuthState {
   token: string | null;
   username: string | null;
-  authorities: string[];
+  roles: string[];
   error: string | null;
   loading: boolean; 
 }
@@ -12,7 +12,7 @@ export interface AuthState {
 const initialState: AuthState = {
   token: localStorage.getItem('token'),
   username: null,
-  authorities: [],
+  roles: [],
   error: null,
   loading: false 
 };
@@ -28,11 +28,11 @@ export const authReducer = createReducer(
   })),
 
   // LOGIN SUCCESS
-  on(AuthActions.loginSuccess, (state, { token, username, authorities }) => ({
+  on(AuthActions.loginSuccess, (state, { token, username, roles }) => ({
     ...state,
     token,
     username,
-    authorities,
+    roles: roles.map((role: any) => role.authority || role),
     error: null,
     loading: false
   })),
@@ -52,11 +52,11 @@ export const authReducer = createReducer(
   })),
 
   // REGISTER SUCCESS
-  on(AuthActions.registerSuccess, (state, { token, username, authorities }) => ({
+  on(AuthActions.registerSuccess, (state, { token, username, roles }) => ({
     ...state,
     token,
     username,
-    authorities,
+    roles: roles.map((role: any) => role.authority || role),
     error: null,
     loading: false
   })),
@@ -67,7 +67,7 @@ export const authReducer = createReducer(
     error,
     loading: false
   })),
-
+  on(AuthActions.authStateUpdated, state => ({ ...state })),
   // LOGOUT
   on(AuthActions.logoutSuccess, () => ({
     ...initialState,

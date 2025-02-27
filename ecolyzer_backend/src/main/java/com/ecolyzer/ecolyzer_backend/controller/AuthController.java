@@ -30,61 +30,67 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final UserService userService;
-    private final TokenBlacklistService tokenBlacklistService;
+        private final AuthenticationManager authenticationManager;
+        private final JwtTokenProvider jwtTokenProvider;
+        private final UserService userService;
+        private final TokenBlacklistService tokenBlacklistService;
 
+        public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider,
+                        UserService userService, TokenBlacklistService tokenBlacklistService) {
+                this.authenticationManager = authenticationManager;
+                this.jwtTokenProvider = jwtTokenProvider;
+                this.userService = userService;
+                this.tokenBlacklistService = tokenBlacklistService;
+        }
 
-    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider,
-            UserService userService, TokenBlacklistService tokenBlacklistService) {
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.userService = userService;
-        this.tokenBlacklistService = tokenBlacklistService;
-    }
+        @PostMapping("/login")
+        public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+                User user = userService.loadUserByUsername(request.getUsernameOrEmail());
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        User user = userService.loadUserByUsername(request.getUsernameOrEmail());
-    
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getUsername(), request.getPassword())
-        );
-    
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-    
-        String token = jwtTokenProvider.generateToken(userDetails.getUsername(), roles);
-    
-        return ResponseEntity.ok(new AuthResponse(token, userDetails.getUsername(), userDetails.getEmail(),
-                userDetails.getAuthorities()));
-    }
-    
+                if (request.getUsernameOrEmail() == null || request.getUsernameOrEmail().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Username or email cannot be null or empty");
+                }
+                if (!user.isApproved()) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody UserRequestDTO userDTO) {
-        UserRequestDTO registeredUser = userService.register(userDTO);
+                }
 
-        List<String> roles = registeredUser.getRoles();
+                Authentication authentication = authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(user.getUsername(), request.getPassword()));
 
-        String token = jwtTokenProvider.generateToken(registeredUser.getUsername(), roles);
+                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+                List<String> roles = userDetails.getAuthorities().stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .toList();
 
-        List<SimpleGrantedAuthority> authorities = roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+                String token = jwtTokenProvider.generateToken(userDetails.getUsername(), roles);
 
-        return ResponseEntity
-                .ok(new AuthResponse(token, registeredUser.getUsername(), registeredUser.getEmail(), authorities));
-    }
+                return ResponseEntity.ok(new AuthResponse(token, userDetails.getUsername(), userDetails.getEmail(),
+                                userDetails.getAuthorities()));
+        }
 
-      @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorization) {
-        String token = authorization.replace("Bearer ", "");
-        tokenBlacklistService.blacklistToken(token);
+        @PostMapping("/register")
+        public ResponseEntity<AuthResponse> register(@RequestBody UserRequestDTO userDTO) {
+                UserRequestDTO registeredUser = userService.register(userDTO);
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
+                List<String> roles = registeredUser.getRoles();
+
+                String token = jwtTokenProvider.generateToken(registeredUser.getUsername(), roles);
+
+                List<SimpleGrantedAuthority> authorities = roles.stream()
+                                .map(SimpleGrantedAuthority::new)
+                                .toList();
+
+                return ResponseEntity
+                                .ok(new AuthResponse(token, registeredUser.getUsername(), registeredUser.getEmail(),
+                                                authorities));
+        }
+
+        @PostMapping("/logout")
+        public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorization) {
+                String token = authorization.replace("Bearer ", "");
+                tokenBlacklistService.blacklistToken(token);
+
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
 }

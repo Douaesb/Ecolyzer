@@ -23,4 +23,6 @@ public class User {
     @DBRef
     private List<Role> roles;
 
+    private boolean approved = false;
+
 }

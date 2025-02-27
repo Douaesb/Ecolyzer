@@ -19,7 +19,7 @@ export const selectAuthUser = createSelector(
 // Select Authorities (Roles)
 export const selectUserAuthorities = createSelector(
   selectAuthState,
-  (state) => state.authorities
+  (state) => state.roles
 );
 
 // Select Auth Error

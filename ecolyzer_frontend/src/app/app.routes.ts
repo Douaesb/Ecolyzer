@@ -1,40 +1,59 @@
 import { Routes } from '@angular/router';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { DeviceListComponent } from './components/devices/device-list.component';
-import { ZoneListComponent } from './components/zones/zone-list.component';
-import { AlertListComponent } from './components/alerts/alert-list.component';
-import { EnergyReportComponent } from './components/reports/energy-report.component';
-import { UserManagementComponent } from './components/users/user-management.component';
 import { MainLayoutComponent } from './main-layout.component';
+import { AuthGuard } from './guards/auth.guard'; 
 
 export const routes: Routes = [
-  // { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-
   {
     path: 'auth',
     children: [
       {
         path: 'login',
         loadComponent: () =>
-          import('./components/auth/login.component').then(m => m.LoginComponent)
+          import('./components/auth/login.component').then(m => m.LoginComponent),
       },
       {
         path: 'register',
         loadComponent: () =>
-          import('./components/auth/register.component').then(m => m.RegisterComponent)
+          import('./components/auth/register.component').then(m => m.RegisterComponent),
       }
     ]
   },
   {
     path: '',
     component: MainLayoutComponent,
+    // canActivate: [() => AuthGuard(['ROLE_USER', 'ROLE_ADMIN'])],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'devices', component: DeviceListComponent },
-      { path: 'zones', component: ZoneListComponent },
-      { path: 'alerts', component: AlertListComponent },
-      { path: 'reports', component: EnergyReportComponent },
-      { path: 'users', component: UserManagementComponent },
-    ],
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
+      },
+      {
+        path: 'devices',
+        loadComponent: () =>
+          import('./components/devices/device-list.component').then(m => m.DeviceListComponent),
+      },
+      {
+        path: 'zones',
+        loadComponent: () =>
+          import('./components/zones/zone-list.component').then(m => m.ZoneListComponent),
+      },
+      {
+        path: 'alerts',
+        loadComponent: () =>
+          import('./components/alerts/alert-list.component').then(m => m.AlertListComponent),
+      },
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./components/reports/energy-report.component').then(m => m.EnergyReportComponent),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./components/users/user-management.component').then(m => m.UserManagementComponent),
+      }
+    ]
   },
+  { path: '**', redirectTo: 'dashboard' } 
 ];
