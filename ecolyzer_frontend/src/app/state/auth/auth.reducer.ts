@@ -4,6 +4,7 @@ import * as AuthActions from './auth.action';
 export interface AuthState {
   token: string | null;
   username: string | null;
+  email: string | null; 
   roles: string[];
   error: string | null;
   loading: boolean; 
@@ -12,6 +13,7 @@ export interface AuthState {
 const initialState: AuthState = {
   token: localStorage.getItem('token'),
   username: null,
+  email: null,
   roles: [],
   error: null,
   loading: false 
@@ -52,10 +54,11 @@ export const authReducer = createReducer(
   })),
 
   // REGISTER SUCCESS
-  on(AuthActions.registerSuccess, (state, { token, username, roles }) => ({
+  on(AuthActions.registerSuccess, (state, { token, username, email, roles }) => ({
     ...state,
     token,
     username,
+    email, 
     roles: roles.map((role: any) => role.authority || role),
     error: null,
     loading: false

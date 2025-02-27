@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { AuthResponse } from '../model/auth.model';
 import { jwtDecode } from 'jwt-decode';
 
@@ -29,15 +29,31 @@ export class AuthService {
     return headers;
   }
 
-
-  login(username: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/login`, { usernameOrEmail: username, password },
-      { headers: this.getHeaders() }
+  login(usernameOrEmail: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.API_URL}/login`, { usernameOrEmail, password }, { headers: this.getHeaders() }).pipe(
+      catchError(error => {
+        let errorMessage = 'Email ou mot de passe incorrect.';
+  
+        switch (error.status) {
+          case 401:
+            errorMessage = 'Email ou mot de passe incorrect.';
+            break;
+          case 403:
+            errorMessage = 'Votre compte doit être approuvé avant connexion.';
+            break;
+          case 404:
+            errorMessage = 'Utilisateur introuvable.';
+            break;
+        }
+  
+        return throwError(() => new Error(errorMessage));
+      })
     );
   }
+  
 
-  register(username: string, password: string, roles: string[]): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/register`, { username, password, roles },
+  register(username: string, email: string, password: string, roles: string[]): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.API_URL}/register`, { username, email, password, roles },
       { headers: this.getHeaders() }
     );
   }

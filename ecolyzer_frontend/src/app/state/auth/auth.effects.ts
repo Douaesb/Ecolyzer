@@ -21,29 +21,28 @@ export class AuthEffects {
       ofType(AuthActions.login),
       mergeMap(({ credentials }) =>
         this.authService.login(credentials.usernameOrEmail, credentials.password).pipe(
-          map((response) => {
-            const roles = this.extractRoles(response);
-            return AuthActions.loginSuccess({
-              token: response.token,
-              username: response.username,
-              roles
-            });
-          }),
-          catchError(error => of(AuthActions.loginFailure({ error: error.error?.message || 'Login failed' })))
+          map(response => AuthActions.loginSuccess({
+            token: response.token,
+            username: response.username,
+            roles: this.extractRoles(response)
+          })),
+          catchError(error => of(AuthActions.loginFailure({ error: error.message }))) 
         )
       )
     )
   );
+  
 
   // REGISTER EFFECT (Redirect to Login)
   register$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.register),
       mergeMap(({ credentials }) =>
-        this.authService.register(credentials.username, credentials.password, credentials.roles).pipe(
+        this.authService.register(credentials.username, credentials.email, credentials.password, credentials.roles).pipe(
           map((response) => AuthActions.registerSuccess({
             token: response.token, 
             username: response.username, 
+            email: response.email, 
             roles: this.extractRoles(response) 
           })),
           catchError(error => of(AuthActions.registerFailure({ error: error.error?.message || 'Registration failed' })))

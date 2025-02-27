@@ -48,6 +48,9 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.loading = authState.loading;
         this.error = authState.error;
         console.log('Auth State after login:', authState);
+        if (this.error) {
+          console.error('Login error:', this.error);
+        }
       })
     );
   }

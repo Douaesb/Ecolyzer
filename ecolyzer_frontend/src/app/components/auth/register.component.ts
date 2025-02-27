@@ -101,6 +101,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
     const { username, email, password, roles } = this.registerForm.value;
     const formattedRoles = Array.isArray(roles) ? roles : [roles];
+    console.log('Submitting:', { username, email, password, roles: formattedRoles });
 
     this.store.dispatch(
       AuthActions.register({

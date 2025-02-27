@@ -26,7 +26,7 @@ export const register = createAction(
 
 export const registerSuccess = createAction(
   '[Auth] Register Success',
-  props<{ token: string; username: string; roles: string[] }>()
+  props<{ token: string; username: string;  email: string; roles: string[] }>()
 );
 
 export const registerFailure = createAction(
