@@ -10,6 +10,8 @@ import { AuthEffects } from './state/auth/auth.effects';
 import { authReducer } from './state/auth/auth.reducer';
 import { userReducer } from './state/user/user.reducer';
 import { UserEffects } from './state/user/user.effects';
+import { zoneReducer } from './state/zone/zone.reducer';
+import { ZoneEffects } from './state/zone/zone.effects';
 
 
 export function localStorageSyncReducer(reducer: any): any {
@@ -20,8 +22,8 @@ const metaReducers: MetaReducer[] = [localStorageSyncReducer];
 
 export const appConfig: ApplicationConfig = {
   providers: [provideRouter(routes),
-    provideStore({ auth: authReducer, users: userReducer }, { metaReducers }),
-    provideEffects([AuthEffects, UserEffects]),
+    provideStore({ auth: authReducer, users: userReducer, zones: zoneReducer }, { metaReducers }),
+    provideEffects([AuthEffects, UserEffects, ZoneEffects]),
     provideHttpClient(withInterceptors([authInterceptor])),
   ],
   
