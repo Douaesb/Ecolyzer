@@ -1,6 +1,7 @@
 package com.ecolyzer.ecolyzer_backend.service.impl;
 
 import com.ecolyzer.ecolyzer_backend.dto.request.UserRequestDTO;
+import com.ecolyzer.ecolyzer_backend.dto.response.UserResponseDTO;
 import com.ecolyzer.ecolyzer_backend.exception.ResourceNotFoundException;
 import com.ecolyzer.ecolyzer_backend.exception.RoleNotFoundException;
 import com.ecolyzer.ecolyzer_backend.exception.UsernameAlreadyExistsException;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserRequestDTO register(UserRequestDTO userDTO) {
+    public UserResponseDTO register(UserRequestDTO userDTO) {
         if (userRepository.existsByUsername(userDTO.getUsername())) {
             throw new UsernameAlreadyExistsException("Username '" + userDTO.getUsername() + "' is already taken");
         }
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public List<UserRequestDTO> getAllUsers() {
+    public List<UserResponseDTO> getAllUsers() {
         return userRepository.findAll().stream().map(userMapper::toDTO).toList();
     }
 
@@ -94,6 +94,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         return "User approved successfully";
+    }
+
+    @Override
+    public void deleteUser(String id){
+        userRepository.deleteById(id);
     }
     
 

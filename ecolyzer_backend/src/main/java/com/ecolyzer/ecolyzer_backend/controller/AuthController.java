@@ -3,6 +3,7 @@ package com.ecolyzer.ecolyzer_backend.controller;
 import com.ecolyzer.ecolyzer_backend.dto.request.LoginRequest;
 import com.ecolyzer.ecolyzer_backend.dto.request.UserRequestDTO;
 import com.ecolyzer.ecolyzer_backend.dto.response.AuthResponse;
+import com.ecolyzer.ecolyzer_backend.dto.response.UserResponseDTO;
 import com.ecolyzer.ecolyzer_backend.model.User;
 import com.ecolyzer.ecolyzer_backend.security.JwtTokenProvider;
 import com.ecolyzer.ecolyzer_backend.service.TokenBlacklistService;
@@ -71,7 +72,7 @@ public class AuthController {
 
         @PostMapping("/register")
         public ResponseEntity<AuthResponse> register(@RequestBody UserRequestDTO userDTO) {
-                UserRequestDTO registeredUser = userService.register(userDTO);
+                UserResponseDTO registeredUser = userService.register(userDTO);
 
                 List<String> roles = registeredUser.getRoles();
 

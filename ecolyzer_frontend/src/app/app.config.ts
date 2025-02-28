@@ -8,6 +8,8 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { AuthEffects } from './state/auth/auth.effects';
 import { authReducer } from './state/auth/auth.reducer';
+import { userReducer } from './state/user/user.reducer';
+import { UserEffects } from './state/user/user.effects';
 
 
 export function localStorageSyncReducer(reducer: any): any {
@@ -18,8 +20,8 @@ const metaReducers: MetaReducer[] = [localStorageSyncReducer];
 
 export const appConfig: ApplicationConfig = {
   providers: [provideRouter(routes),
-    provideStore({ auth: authReducer }, { metaReducers }),
-    provideEffects([AuthEffects,]),
+    provideStore({ auth: authReducer, users: userReducer }, { metaReducers }),
+    provideEffects([AuthEffects, UserEffects]),
     provideHttpClient(withInterceptors([authInterceptor])),
   ],
   

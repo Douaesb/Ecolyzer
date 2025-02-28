@@ -31,6 +31,7 @@ public class UserRequestDTO {
     private String password;
 
     private Boolean active = true;
+    
 
     private List<String> roles;
 }
