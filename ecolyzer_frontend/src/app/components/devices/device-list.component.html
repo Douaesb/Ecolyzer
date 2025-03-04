@@ -1,0 +1,115 @@
+<div class="p-6">
+  <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Gestion des Appareils</h1>
+    <button (click)="openEditModal(null)" class="btn-primary mt-4 md:mt-0 flex items-center space-x-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      <span>Ajouter un appareil</span>
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="relative">
+      <input 
+        type="text" 
+        placeholder="Rechercher un appareil par nom..."
+        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+        (input)="searchDevices($event)">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-3" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+      </svg>
+    </div>
+    <div class="relative">
+      <input 
+        type="text" 
+        placeholder="Rechercher un appareil par numero de serie..."
+        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+        (input)="filterDevices($event)">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-3" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+      </svg>
+    </div>
+    <select 
+  class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+  (change)="getDevicesByZone($event)">
+  <option value="all">Toutes les zones</option>
+  <option *ngFor="let zone of zones$ | async" [value]="zone.id">{{ zone.name }}</option>
+</select>
+
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div *ngFor="let device of devices$ | async" class="card hover:transform hover:scale-105 transition-all duration-300">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800">{{device.name}}</h3>
+          <p class="text-sm text-gray-500">{{device.serialNum}}</p>
+
+        </div>
+        <!-- <span [class]="device.id === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+              class="px-3 py-1 rounded-full text-sm font-medium">
+          {{device.id === 'active' ? 'Actif' : 'Inactif'}}
+        </span> -->
+      </div>
+
+      <div class="space-y-2 mb-6">
+        <div class="flex items-center text-gray-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+          </svg>
+          <!-- <span>{{device.zoneId}}</span> -->
+          <ng-container *ngIf="zoneMap$ | async as zoneMap">
+              <span>{{ getZoneName(device.zoneId, zoneMap) }}</span>
+            </ng-container>
+        </div>
+        <div class="flex items-center text-gray-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M13 7H7v6h6V7z" />
+            <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd" />
+          </svg>
+          <span>Dernière activité : Aujourd'hui 14:30</span>
+        </div>
+        <div class="flex items-center text-gray-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M11 1L3 10h5v7l8-9h-5l2-7z" clip-rule="evenodd" />
+            </svg>
+          <span>Energy Threshold : {{device.energyThreshold}}</span>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2">
+      <button 
+            class="w-8 h-8 flex items-center justify-center rounded-md bg-green-100 text-green-600 hover:bg-green-600 hover:text-white transition-colors"
+            (click)="openEditModal(device)">
+            <span class="material-icons" style="font-size: 18px">edit</span>
+          </button>
+          <button 
+            class="w-8 h-8 flex items-center justify-center rounded-md bg-red-100 text-red-600 hover:bg-red-600 hover:text-white transition-colors"
+            (click)="onDeleteDevice(device.id)">
+            <span class="material-icons" style="font-size: 18px">delete</span>
+            
+          </button>
+      
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Modal -->
+<div *ngIf="selectedDevice" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+    <h2 class="text-xl font-semibold mb-4">{{ selectedDevice.id ? 'Modifier' : 'Ajouter' }} un appareil</h2>
+    <input [(ngModel)]="selectedDevice.name" type="text" placeholder="Nom" class="w-full mb-3 p-2 border rounded" />
+    <input [(ngModel)]="selectedDevice.serialNum" type="number" placeholder="Numéro de série" class="w-full mb-3 p-2 border rounded" />
+    <input [(ngModel)]="selectedDevice.energyThreshold" type="number" placeholder="Seuil d'énergie" class="w-full mb-3 p-2 border rounded" />
+    <select [(ngModel)]="selectedDevice.zoneId" class="w-full mb-3 p-2 border rounded">
+      <option value="" disabled selected>Choisir une zone</option>
+      <option *ngFor="let zone of zones$ | async" [value]="zone.id">{{ zone.name }}</option>
+    </select>      
+    <div class="flex justify-end space-x-2">
+      <button (click)="closeEditModal()" class="px-4 py-2 bg-gray-300 rounded">Annuler</button>
+      <button (click)="onSaveDevice()" class="px-4 py-2 bg-blue-600 text-white rounded">{{ selectedDevice.id ? 'Modifier' : 'Ajouter' }}</button>
+    </div>
+  </div>
+</div>
