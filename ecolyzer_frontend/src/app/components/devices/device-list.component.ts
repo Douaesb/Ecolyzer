@@ -23,6 +23,8 @@ import {
 import { selectAllZones } from '../../state/zone/zone.selectors';
 import { loadZones } from '../../state/zone/zone.actions';
 import { Zone } from '../../model/zone.model';
+import { loadAlertsByDevice } from '../../state/threshold/threshold-alert.actions';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-device-list',
@@ -47,7 +49,7 @@ export class DeviceListComponent implements OnInit {
   zones$: Observable<Zone[]> = this.store.select(selectAllZones);
   selectedDevice: Partial<Device> | null = null;
   zoneMap$!: Observable<Record<string, string>>;
-  constructor(private store: Store) {}
+  constructor(private store: Store, private router: Router) {}
 
   ngOnInit(): void {
     this.store.dispatch(loadDevices({ page: 0, size: 10 }));
@@ -152,5 +154,13 @@ export class DeviceListComponent implements OnInit {
       }
     }
   }
+
+  viewAlerts(deviceId: string): void {
+    console.log('Viewing alerts for device with ID:', deviceId);
+    this.store.dispatch(loadAlertsByDevice({ deviceId }));
+    this.router.navigate(['/alerts'], { queryParams: { deviceId } });
+
+  }
+  
   
 }

@@ -14,6 +14,8 @@ import { zoneReducer } from './state/zone/zone.reducer';
 import { ZoneEffects } from './state/zone/zone.effects';
 import { deviceReducer } from './state/device/device.reducer';
 import { DeviceEffects } from './state/device/device.effects';
+import { thresholdAlertReducer } from './state/threshold/threshold-alert.reducer';
+import { ThresholdAlertEffects } from './state/threshold/threshold-alert.effects';
 
 
 export function localStorageSyncReducer(reducer: any): any {
@@ -24,8 +26,8 @@ const metaReducers: MetaReducer[] = [localStorageSyncReducer];
 
 export const appConfig: ApplicationConfig = {
   providers: [provideRouter(routes),
-    provideStore({ auth: authReducer, users: userReducer, zones: zoneReducer , devices:  deviceReducer}, { metaReducers }),
-    provideEffects([AuthEffects, UserEffects, ZoneEffects, DeviceEffects]),
+    provideStore({ auth: authReducer, users: userReducer, zones: zoneReducer , devices:  deviceReducer, thresholdAlert: thresholdAlertReducer}, { metaReducers }),
+    provideEffects([AuthEffects, UserEffects, ZoneEffects, DeviceEffects, ThresholdAlertEffects]),
     provideHttpClient(withInterceptors([authInterceptor])),
   ],
   
