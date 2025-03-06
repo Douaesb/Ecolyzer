@@ -57,19 +57,45 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         log.info("✅ Processed {} energy data entries.", unprocessedData.size());
     }
 
+//    public Double calculateDailyEnergyConsumption(String deviceId, LocalDate date) {
+//        LocalDateTime startOfDay = date.atStartOfDay();
+//        LocalDateTime endOfDay = startOfDay.plusDays(1);
+//
+//        Optional<EnergyConsumption> startConsumptionOpt = repository.findByDeviceIdAndTimestampBefore(deviceId, startOfDay);
+//        Optional<EnergyConsumption> endConsumptionOpt = repository.findByDeviceIdAndTimestampBefore(deviceId, endOfDay);
+//
+//        double startTotalConsumption = startConsumptionOpt.map(EnergyConsumption::getTotalConsumption).orElse(0.0);
+//        double endTotalConsumption = endConsumptionOpt.map(EnergyConsumption::getTotalConsumption).orElse(0.0);
+//
+//        return endTotalConsumption - startTotalConsumption;
+//    }
+
     public Double calculateDailyEnergyConsumption(String deviceId, LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = startOfDay.plusHours(24);
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay(); // Start of today
+        LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59); // End of today
 
-        List<SensorData> energyReadings = sensorDataRepository.findEnergyDataForDeviceBetween(deviceId, startOfDay, endOfDay);
+        log.info("🔍 Calculating energy consumption for device {} for date range: {} - {}",
+                deviceId, startOfDay, endOfDay);
 
-        return energyReadings.stream()
-                .mapToDouble(SensorData::getValue)
-                .sum();
+        List<EnergyConsumption> consumptionRecords = repository.findByDeviceIdAndTimestampBetween(deviceId, startOfDay, endOfDay);
+
+        log.info("🔄 Retrieved {} consumption records for device {}.", consumptionRecords.size(), deviceId);
+
+        double totalConsumption = 0.0;
+        for (EnergyConsumption consumption : consumptionRecords) {
+            totalConsumption += consumption.getTotalConsumption();
+        }
+
+        log.info("📊 Total energy consumption for device {}: {} kWh", deviceId, totalConsumption);
+
+        return totalConsumption;
     }
+
 
     public void updateEnergyConsumption(SensorData sensorData) {
         if (!"energy".equalsIgnoreCase(sensorData.getType().name())) return;
+
+        log.info("🔄 Updating energy consumption for SensorData ID: {}", sensorData.getId());
 
         Capteur capteur = capteurRepository.findById(sensorData.getCapteur().getId()).orElse(null);
 
@@ -77,12 +103,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             log.warn("⚠ Capteur or Device not found for SensorData: {}", sensorData.getId());
             return;
         }
+
         Device device = capteur.getDevice();
         EnergyConsumption consumption = repository.findByDeviceId(device.getId())
                 .orElseGet(() -> new EnergyConsumption(null, device, 0.0, LocalDateTime.now()));
 
         double newConsumption = consumption.getTotalConsumption() + sensorData.getValue();
         consumption.setTotalConsumption(newConsumption);
+        consumption.setTimestamp(LocalDateTime.now());
         repository.save(consumption);
 
         log.info("✅ Updated Energy Consumption for Device: {}, New Total: {} kWh", device.getId(), newConsumption);
@@ -119,24 +147,45 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * ?") // Runs every midnight
+    @Scheduled(cron = "0 0 10 * * ?") // Runs every day at 10 AM
     public void generateDailyEnergySummary() {
         log.info("📊 Running daily energy consumption summary task...");
 
         List<Device> devices = deviceRepository.findAll();
+        log.info("📱 Found {} devices to process.", devices.size());
 
         for (Device device : devices) {
-            double dailyConsumption = calculateDailyEnergyConsumption(device.getId(), LocalDate.now().minusDays(1));
+            LocalDate summaryDate = LocalDate.now().minusDays(1);
+            double dailyConsumption = calculateDailyEnergyConsumption(device.getId(), summaryDate);
+
+            log.info("📊 Daily consumption for Device {}: {} kWh", device.getId(), dailyConsumption);
 
             int alertCount = thresholdAlertRepository.countByDeviceIdAndTimestampBetween(
                     device.getId(),
-                    LocalDate.now().minusDays(1).atStartOfDay(),
-                    LocalDate.now().atStartOfDay()
+                    summaryDate.atStartOfDay(),
+                    summaryDate.atTime(23, 59, 59)
             );
 
-            EnergyConsumptionSummary summary = new EnergyConsumptionSummary();
-            summary.setDevice(device);
-            summary.setDate(LocalDate.now().minusDays(1));
+            log.info("⚠ Alert count for Device {}: {}", device.getId(), alertCount);
+
+            // 🔽 Check if an existing summary already exists
+            Optional<EnergyConsumptionSummary> existingSummary =
+                    energySummaryRepository.findLatestByDeviceIdAndDate(device.getId(), summaryDate);
+
+            EnergyConsumptionSummary summary;
+
+            if (existingSummary.isPresent()) {
+                // ✅ Update existing summary
+                summary = existingSummary.get();
+                log.info("🔄 Updating existing summary for Device {}", device.getId());
+            } else {
+                // ✅ Create new summary
+                summary = new EnergyConsumptionSummary();
+                summary.setDevice(device);
+                summary.setDate(summaryDate);
+                log.info("🆕 Creating new summary for Device {}", device.getId());
+            }
+
             summary.setTotalEnergyConsumption(dailyConsumption);
             summary.setAlertCount(alertCount);
 

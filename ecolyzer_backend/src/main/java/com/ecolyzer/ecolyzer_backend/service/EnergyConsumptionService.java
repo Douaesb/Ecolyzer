@@ -17,4 +17,6 @@ public interface EnergyConsumptionService {
     List<EnergyConsumptionSummary> getAllEnergySummaries();
 
     Optional<EnergyConsumptionSummary> getEnergySummaryByZone(String zoneName, LocalDate date, Pageable pageable);
+
+    void generateDailyEnergySummary();
 }

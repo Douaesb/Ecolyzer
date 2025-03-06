@@ -25,6 +25,7 @@ import { loadZones } from '../../state/zone/zone.actions';
 import { Zone } from '../../model/zone.model';
 import { loadAlertsByDevice } from '../../state/threshold/threshold-alert.actions';
 import { Router } from '@angular/router';
+import { loadCurrentEnergyConsumption } from '../../state/energy/energy-consumption.actions';
 
 @Component({
   selector: 'app-device-list',
@@ -159,8 +160,12 @@ export class DeviceListComponent implements OnInit {
     console.log('Viewing alerts for device with ID:', deviceId);
     this.store.dispatch(loadAlertsByDevice({ deviceId }));
     this.router.navigate(['/alerts'], { queryParams: { deviceId } });
-
   }
   
+  viewEnergy(deviceId: string): void {
+    console.log('Viewing energy for device with ID:', deviceId);
+    this.store.dispatch(loadCurrentEnergyConsumption({ deviceId }));
+    this.router.navigate(['/energy'], { queryParams: { deviceId } });
+  }
   
 }

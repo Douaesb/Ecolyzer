@@ -125,7 +125,28 @@ import { Store } from '@ngrx/store';
 
           Reports
         </a>
+        <a
+          routerLink="/energy"
+          routerLinkActive="bg-emerald-50 text-emerald-600"
+          class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-50"
+        >
+          <svg
+            class="w-5 h-5 mr-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 17v-2m4 2v-4m4 4v-6m-9 6h10M5 3h14a2 2 0 012 2v16a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"
+            />
+          </svg>
 
+          energy
+        </a>
         <a
           routerLink="/users"
           routerLinkActive="bg-emerald-50 text-emerald-600"

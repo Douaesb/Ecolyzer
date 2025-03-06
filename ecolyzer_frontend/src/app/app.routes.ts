@@ -52,7 +52,12 @@ export const routes: Routes = [
         path: 'users',
         loadComponent: () =>
           import('./components/users/user-management.component').then(m => m.UserManagementComponent),
-      }
+      },
+      {
+        path: 'energy',
+        loadComponent: () =>
+          import('./components/energy/energy-consumption.component').then(m => m.EnergyConsumptionComponent),
+      },
     ]
   },
   { path: '**', redirectTo: 'dashboard' } 

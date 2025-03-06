@@ -3,6 +3,7 @@ package com.ecolyzer.ecolyzer_backend.controller;
 import com.ecolyzer.ecolyzer_backend.model.EnergyConsumption;
 import com.ecolyzer.ecolyzer_backend.model.EnergyConsumptionSummary;
 import com.ecolyzer.ecolyzer_backend.service.EnergyConsumptionService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@Slf4j
 @RequestMapping("/api/energy")
 public class EnergyConsumptionController {
 
@@ -35,10 +37,22 @@ public class EnergyConsumptionController {
     public ResponseEntity<EnergyConsumptionSummary> getDailyEnergySummary(
             @PathVariable String deviceId,
             @RequestParam(required = false) LocalDate date) {
+
         LocalDate queryDate = (date != null) ? date : LocalDate.now().minusDays(1);
+
+        log.info("Fetching daily energy summary for Device ID: {} on Date: {}", deviceId, queryDate);
+
         Optional<EnergyConsumptionSummary> summary = energyConsumptionService.getEnergySummaryByDeviceAndDate(deviceId, queryDate);
-        return summary.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
+        if (summary.isPresent()) {
+            log.info("Summary found: {}", summary.get());
+            return ResponseEntity.ok(summary.get());
+        } else {
+            log.warn("No energy summary found for Device ID: {} on Date: {}", deviceId, queryDate);
+            return ResponseEntity.notFound().build();
+        }
     }
+
 
     @GetMapping("/admin/summary/all")
     @PreAuthorize("hasRole('ADMIN')")
@@ -62,4 +76,10 @@ public class EnergyConsumptionController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+
+    @PostMapping("/generate-summary")
+    public ResponseEntity<String> generateSummary() {
+        energyConsumptionService.generateDailyEnergySummary();
+        return ResponseEntity.ok("Daily energy summary generation triggered manually.");
+    }
 }
