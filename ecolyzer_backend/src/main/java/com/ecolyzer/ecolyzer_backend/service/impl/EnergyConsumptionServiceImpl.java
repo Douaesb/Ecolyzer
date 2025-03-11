@@ -147,17 +147,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
     }
 
-    @Scheduled(cron = "0 0 10 * * ?") // Runs every day at 10 AM
+    @Scheduled(cron = "0 0 11 * * ?", zone = "Africa/Casablanca")
     public void generateDailyEnergySummary() {
         log.info("📊 Running daily energy consumption summary task...");
 
         List<Device> devices = deviceRepository.findAll();
         log.info("📱 Found {} devices to process.", devices.size());
 
-        for (Device device : devices) {
-            LocalDate summaryDate = LocalDate.now().minusDays(1);
-            double dailyConsumption = calculateDailyEnergyConsumption(device.getId(), summaryDate);
+        LocalDate summaryDate = LocalDate.now().minusDays(1);
 
+        for (Device device : devices) {
+            boolean summaryExists = energySummaryRepository.existsByDeviceIdAndDate(device.getId(), summaryDate);
+
+            if (summaryExists) {
+                log.info("⏭️ Skipping summary for Device {} on {} (already exists)", device.getId(), summaryDate);
+                continue;
+            }
+
+            double dailyConsumption = calculateDailyEnergyConsumption(device.getId(), summaryDate);
             log.info("📊 Daily consumption for Device {}: {} kWh", device.getId(), dailyConsumption);
 
             int alertCount = thresholdAlertRepository.countByDeviceIdAndTimestampBetween(
@@ -165,32 +172,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     summaryDate.atStartOfDay(),
                     summaryDate.atTime(23, 59, 59)
             );
-
             log.info("⚠ Alert count for Device {}: {}", device.getId(), alertCount);
 
-            // 🔽 Check if an existing summary already exists
-            Optional<EnergyConsumptionSummary> existingSummary =
-                    energySummaryRepository.findLatestByDeviceIdAndDate(device.getId(), summaryDate);
-
-            EnergyConsumptionSummary summary;
-
-            if (existingSummary.isPresent()) {
-                // ✅ Update existing summary
-                summary = existingSummary.get();
-                log.info("🔄 Updating existing summary for Device {}", device.getId());
-            } else {
-                // ✅ Create new summary
-                summary = new EnergyConsumptionSummary();
-                summary.setDevice(device);
-                summary.setDate(summaryDate);
-                log.info("🆕 Creating new summary for Device {}", device.getId());
-            }
-
+            EnergyConsumptionSummary summary = new EnergyConsumptionSummary();
+            summary.setDevice(device);
+            summary.setDate(summaryDate);
             summary.setTotalEnergyConsumption(dailyConsumption);
             summary.setAlertCount(alertCount);
 
             energySummaryRepository.save(summary);
-            log.info("✅ Saved daily energy summary for Device: {}, Total: {} kWh, Alerts: {}",
+            log.info("✅ Created and saved daily energy summary for Device: {}, Total: {} kWh, Alerts: {}",
                     device.getId(), dailyConsumption, alertCount);
         }
     }

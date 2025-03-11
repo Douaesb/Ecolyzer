@@ -13,3 +13,12 @@ export interface EnergyConsumption {
     alertCount: number;
   }
   
+  
+  export interface EnergyConsumptionSummaryChart {
+    id: string;
+    deviceName: string;
+    date: string; 
+    totalEnergyConsumption: number;
+    alertCount: number;
+  }
+  

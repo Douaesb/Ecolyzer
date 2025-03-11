@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -61,6 +62,7 @@ public class DeviceServiceImpl implements DeviceService {
         Device device = deviceMapper.toDevice(dto);
         device.setZone(zoneRepository.findById(dto.getZoneId()).orElseThrow());
         device.setEnergyThreshold(dto.getEnergyThreshold());
+        device.setLastUpdated(LocalDateTime.now());
         Device savedDevice = deviceRepository.save(device);
         List<Capteur> capteurs = List.of(
                 new Capteur(null, "Capteur de Température", SensorType.TEMPERATURE, savedDevice),
@@ -86,6 +88,7 @@ public class DeviceServiceImpl implements DeviceService {
         existingDevice.setName(dto.getName());
         existingDevice.setSerialNum(dto.getSerialNum());
         existingDevice.setEnergyThreshold(dto.getEnergyThreshold());
+        existingDevice.setLastUpdated(LocalDateTime.now());
         existingDevice.setZone(zoneRepository.findById(dto.getZoneId()).orElseThrow());
         Device updatedDevice = deviceRepository.save(existingDevice);
         return deviceMapper.toResponseDTO(updatedDevice);

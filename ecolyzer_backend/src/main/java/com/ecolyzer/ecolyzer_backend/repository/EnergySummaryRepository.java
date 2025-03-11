@@ -13,7 +13,9 @@ public interface EnergySummaryRepository extends MongoRepository<EnergyConsumpti
     Optional<EnergyConsumptionSummary> findByDeviceIdAndDate(String deviceId, LocalDate date);
     @Query(value = "{ 'device.id': ?0, 'date': ?1 }", sort = "{ '_id': -1 }")
     Optional<EnergyConsumptionSummary> findLatestByDeviceIdAndDate(String deviceId, LocalDate date);
+    boolean existsByDeviceIdAndDate(String deviceId, LocalDate date);
 
     List<EnergyConsumptionSummary> findByDeviceInAndDate(List<Device> devices, LocalDate date);
+    List<EnergyConsumptionSummary> findByDateGreaterThanEqual(LocalDate date);
 
 }

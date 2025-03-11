@@ -1,9 +1,12 @@
 package com.ecolyzer.ecolyzer_backend.service.rabbitmq;
 
+import com.ecolyzer.ecolyzer_backend.dto.embedded.EnergyDashboardDTO;
 import com.ecolyzer.ecolyzer_backend.model.Capteur;
 import com.ecolyzer.ecolyzer_backend.model.SensorData;
 import com.ecolyzer.ecolyzer_backend.repository.CapteurRepository;
 import com.ecolyzer.ecolyzer_backend.repository.SensorDataRepository;
+import com.ecolyzer.ecolyzer_backend.service.DashboardService;
+import com.ecolyzer.ecolyzer_backend.service.WebSocketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -16,10 +19,14 @@ public class SensorDataConsumer {
 
     private final SensorDataRepository sensorDataRepository;
     private final CapteurRepository capteurRepository;
+    private final WebSocketService webSocketService;
+    private final DashboardService energyDashboardService;
 
-    public SensorDataConsumer(SensorDataRepository sensorDataRepository, CapteurRepository capteurRepository) {
+    public SensorDataConsumer(SensorDataRepository sensorDataRepository, CapteurRepository capteurRepository, WebSocketService webSocketService, DashboardService energyDashboardService) {
         this.sensorDataRepository = sensorDataRepository;
         this.capteurRepository = capteurRepository;
+        this.webSocketService = webSocketService;
+        this.energyDashboardService = energyDashboardService;
     }
 
     @RabbitListener(queues = "sensor.queue")
@@ -33,6 +40,15 @@ public class SensorDataConsumer {
 
         data.setCapteur(capteur);
         sensorDataRepository.save(data);
+
+        EnergyDashboardDTO dashboardData = energyDashboardService.getDashboardData("today");
+        try {
+            webSocketService.sendRealTimeUpdateToAllSessions(dashboardData);
+            logger.info("Sent real-time update to session in rabbitmQ file: {}", dashboardData);
+        } catch (Exception e) {
+            logger.error("Error sending WebSocket update: {}", e.getMessage());
+        }
+
         logger.info("Message saved to MongoDB ✅");
     }
 }
