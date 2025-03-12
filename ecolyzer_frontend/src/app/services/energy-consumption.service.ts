@@ -1,21 +1,26 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 import { EnergyConsumption, EnergyConsumptionSummary } from '../model/energy-consumption.model';
+import { RoleBasedEndpointService } from './roleBasedEndpoint.service';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EnergyConsumptionService {
-  private apiUrl = 'http://localhost:8080/api/energy';
+  private apiUrl = environment.apiUrl + '/energy';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private roleEndpointService: RoleBasedEndpointService
+  ) {}
 
   private handleError(error: any): Observable<never> {
     let errorMessage = 'An unknown error occurred';
     if (error.status === 404) {
-      errorMessage = 'No summary found'; 
+      errorMessage = 'No summary found';
     } else if (error.status === 500) {
       errorMessage = 'Server error, please try again later';
     }
@@ -23,28 +28,32 @@ export class EnergyConsumptionService {
   }
 
   getCurrentEnergyConsumption(deviceId: string): Observable<EnergyConsumption> {
-    return this.http.get<EnergyConsumption>(`${this.apiUrl}/admin/device/${deviceId}/current`).pipe(
-      catchError(this.handleError) 
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/device/${deviceId}/current`).pipe(
+      switchMap(endpoint => this.http.get<EnergyConsumption>(endpoint)),
+      catchError(this.handleError)
     );
   }
 
   getDailyEnergySummary(deviceId: string, date?: string): Observable<EnergyConsumptionSummary> {
     const query = date ? `?date=${date}` : '';
-    return this.http.get<EnergyConsumptionSummary>(`${this.apiUrl}/admin/device/${deviceId}/summary${query}`).pipe(
-      catchError(this.handleError) 
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/device/${deviceId}/summary${query}`).pipe(
+      switchMap(endpoint => this.http.get<EnergyConsumptionSummary>(endpoint)),
+      catchError(this.handleError)
     );
   }
 
   getAllEnergySummaries(): Observable<EnergyConsumptionSummary[]> {
-    return this.http.get<EnergyConsumptionSummary[]>(`${this.apiUrl}/admin/summary/all`).pipe(
-      catchError(this.handleError) 
+    return this.roleEndpointService.getEndpoint(this.apiUrl, '/summary/all').pipe(
+      switchMap(endpoint => this.http.get<EnergyConsumptionSummary[]>(endpoint)),
+      catchError(this.handleError)
     );
   }
 
   getZoneEnergySummary(zoneName: string, date?: string): Observable<EnergyConsumptionSummary> {
     const query = date ? `?date=${date}` : '';
-    return this.http.get<EnergyConsumptionSummary>(`${this.apiUrl}/admin/zone/${zoneName}/summary${query}`).pipe(
-      catchError(this.handleError) 
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/zone/${zoneName}/summary${query}`).pipe(
+      switchMap(endpoint => this.http.get<EnergyConsumptionSummary>(endpoint)),
+      catchError(this.handleError)
     );
   }
 }

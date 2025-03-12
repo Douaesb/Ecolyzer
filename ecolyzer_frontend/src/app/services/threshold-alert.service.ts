@@ -1,25 +1,37 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, switchMap } from 'rxjs';
 import { ThresholdAlert } from '../model/threshold-alert.model';
+import { RoleBasedEndpointService } from './roleBasedEndpoint.service';
+import { environment } from '../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ThresholdAlertService {
-  private baseUrl = 'http://localhost:8080/api'; 
+  private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private roleEndpointService: RoleBasedEndpointService
+  ) {}
 
   getAlertsByDevice(deviceId: string): Observable<ThresholdAlert[]> {
-    return this.http.get<ThresholdAlert[]>(`${this.baseUrl}/admin/threshold-alerts/device/${deviceId}`);
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/threshold-alerts/device/${deviceId}`).pipe(
+      switchMap(endpoint => this.http.get<ThresholdAlert[]>(endpoint))
+    );
   }
 
   updateAlertStatus(alertId: string, status: string): Observable<ThresholdAlert> {
-    return this.http.put<ThresholdAlert>(`${this.baseUrl}/alerts/${alertId}/status?status=${status}`, {});
+    const params = new HttpParams().set('status', status);
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/alerts/${alertId}/status`).pipe(
+      switchMap(endpoint => this.http.put<ThresholdAlert>(endpoint, {}, { params }))
+    );
   }
 
   deleteAlert(alertId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/admin/threshold-alerts/${alertId}`);
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/threshold-alerts/${alertId}`).pipe(
+      switchMap(endpoint => this.http.delete<void>(endpoint))
+    );
   }
 }

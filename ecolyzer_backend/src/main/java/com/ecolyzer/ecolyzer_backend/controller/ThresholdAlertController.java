@@ -25,7 +25,7 @@ public class ThresholdAlertController {
         return ResponseEntity.ok(thresholdAlertService.getThresholdAlertsByDevice(deviceId));
     }
 
-    @PutMapping("/alerts/{alertId}/status")
+    @PutMapping("/admin/alerts/{alertId}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ThresholdAlertResponseDTO> updateThresholdAlertStatus(
             @PathVariable String alertId,

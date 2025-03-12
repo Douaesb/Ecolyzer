@@ -38,7 +38,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
 
-    @Scheduled(fixedRate = 60000) // Runs every 60 seconds
+    @Scheduled(fixedRate = 10000) // Runs every 10 seconds
     @Transactional
     public void processUnprocessedEnergyData() {
         log.info("⏳ Processing unprocessed energy sensor data...");

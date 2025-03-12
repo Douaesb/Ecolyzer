@@ -1,34 +1,52 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, switchMap } from 'rxjs';
 import { PaginatedZones, Zone } from '../model/zone.model';
+import { RoleBasedEndpointService } from './roleBasedEndpoint.service';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ZoneService {
-  private apiUrl = 'http://localhost:8080/api'; 
+  private apiUrl = environment.apiUrl; 
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private roleEndpointService: RoleBasedEndpointService
+  ) {}
 
   getAllZones(page: number, size: number): Observable<PaginatedZones> {
-    return this.http.get<PaginatedZones>(`${this.apiUrl}/admin/zones?page=${page}&size=${size}`);
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.roleEndpointService.getEndpoint(this.apiUrl, '/zones').pipe(
+      switchMap(endpoint => this.http.get<PaginatedZones>(endpoint, { params }))
+    );
   }
-  
 
   getZoneById(id: string): Observable<Zone> {
-    return this.http.get<Zone>(`${this.apiUrl}/user/zones/${id}`);
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/zones/${id}`).pipe(
+      switchMap(endpoint => this.http.get<Zone>(endpoint))
+    );
   }
 
   createZone(zone: Partial<Zone>): Observable<Zone> {
-    return this.http.post<Zone>(`${this.apiUrl}/admin/zones`, zone);
+    return this.roleEndpointService.getEndpoint(this.apiUrl, '/zones').pipe(
+      switchMap(endpoint => this.http.post<Zone>(endpoint, zone))
+    );
   }
 
   updateZone(id: string, zone: Partial<Zone>): Observable<Zone> {
-    return this.http.put<Zone>(`${this.apiUrl}/admin/zones/${id}`, zone);
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/zones/${id}`).pipe(
+      switchMap(endpoint => this.http.put<Zone>(endpoint, zone))
+    );
   }
 
   deleteZone(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/admin/zones/${id}`);
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/zones/${id}`).pipe(
+      switchMap(endpoint => this.http.delete<void>(endpoint))
+    );
   }
 }
