@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { map, Observable } from 'rxjs';
+import { combineLatest, filter, map, Observable, take } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { FormsModule } from '@angular/forms';
 import { Device } from '../../model/device.model';
@@ -23,9 +23,23 @@ import {
 import { selectAllZones } from '../../state/zone/zone.selectors';
 import { loadZones } from '../../state/zone/zone.actions';
 import { Zone } from '../../model/zone.model';
-import { loadAlertsByDevice } from '../../state/threshold/threshold-alert.actions';
-import { Router } from '@angular/router';
-import { loadCurrentEnergyConsumption } from '../../state/energy/energy-consumption.actions';
+import {
+  loadAlertsByDevice,
+  loadAllActiveAlerts,
+} from '../../state/threshold/threshold-alert.actions';
+import { ActivatedRoute, Router } from '@angular/router';
+import {
+  loadCurrentEnergyConsumption,
+  loadDailyEnergySummary,
+} from '../../state/energy/energy-consumption.actions';
+import {
+  selectCurrentConsumption,
+  selectDailySummary,
+} from '../../state/energy/energy-consumption.selectors';
+import { EnergyDetailsModalComponent } from '../energy/energy-details-modal.component';
+import { MatDialog } from '@angular/material/dialog';
+import { selectIsAdmin } from '../../state/auth/auth.selectors';
+import { selectDevicesWithActiveAlerts } from '../../state/threshold/threshold-alert.selectors';
 
 @Component({
   selector: 'app-device-list',
@@ -50,11 +64,19 @@ export class DeviceListComponent implements OnInit {
   zones$: Observable<Zone[]> = this.store.select(selectAllZones);
   selectedDevice: Partial<Device> | null = null;
   zoneMap$!: Observable<Record<string, string>>;
-  constructor(private store: Store, private router: Router) {}
+  isAdmin$!: Observable<boolean>;
+
+  constructor(
+    private store: Store,
+    private router: Router,
+    private dialog: MatDialog,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
-    this.store.dispatch(loadDevices({ page: 0, size: 10 }));
+    this.store.dispatch(loadAllActiveAlerts());
     this.store.dispatch(loadZones({ page: 0, size: 50 }));
+    this.isAdmin$ = this.store.select(selectIsAdmin);
 
     this.zoneMap$ = this.zones$.pipe(
       map((zones) => {
@@ -64,6 +86,19 @@ export class DeviceListComponent implements OnInit {
         }, {} as Record<string, string>);
       })
     );
+
+    this.route.paramMap.subscribe((params) => {
+      const zoneId = params.get('zoneId');
+      if (zoneId) {
+        console.log('Loading devices for zone:', zoneId);
+        this.store.dispatch(
+          getDevicesByZone({ zoneId, page: 0, pageSize: 10 })
+        );
+      } else {
+        console.log('Loading all devices');
+        this.store.dispatch(loadDevices({ page: 0, size: 10 }));
+      }
+    });
   }
 
   getZoneName(zoneId: string, zoneMap: Record<string, string>): string {
@@ -145,13 +180,15 @@ export class DeviceListComponent implements OnInit {
     if (target) {
       const zoneId = target.value;
       console.log('zoneId:', zoneId);
-  
+
       if (zoneId === 'all') {
         console.log('Dispatching loadDevices');
         this.store.dispatch(loadDevices({ page: 0, size: 10 }));
       } else {
         console.log('Dispatching getDevicesByZone with zoneId:', zoneId);
-        this.store.dispatch(getDevicesByZone({ zoneId}));
+        this.store.dispatch(
+          getDevicesByZone({ zoneId, page: 0, pageSize: 10 })
+        );
       }
     }
   }
@@ -161,11 +198,26 @@ export class DeviceListComponent implements OnInit {
     this.store.dispatch(loadAlertsByDevice({ deviceId }));
     this.router.navigate(['/alerts'], { queryParams: { deviceId } });
   }
-  
+
   viewEnergy(deviceId: string): void {
     console.log('Viewing energy for device with ID:', deviceId);
+
     this.store.dispatch(loadCurrentEnergyConsumption({ deviceId }));
-    this.router.navigate(['/energy'], { queryParams: { deviceId } });
+    this.store.dispatch(loadDailyEnergySummary({ deviceId }));
+
+    const consumption$ = this.store.select(selectCurrentConsumption);
+    const summary$ = this.store.select(selectDailySummary);
+
+    combineLatest([consumption$, summary$])
+      .pipe(
+        filter(([consumption, summary]) => !!consumption && !!summary),
+        take(1)
+      )
+      .subscribe(([consumption, summary]) => {
+        this.dialog.open(EnergyDetailsModalComponent, {
+          width: '500px',
+          data: { consumption, summary },
+        });
+      });
   }
-  
 }

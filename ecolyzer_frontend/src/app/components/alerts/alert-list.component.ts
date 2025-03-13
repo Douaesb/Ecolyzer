@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { ThresholdAlert } from '../../model/threshold-alert.model';
 import { selectAllThresholdAlerts, selectThresholdAlertLoading } from '../../state/threshold/threshold-alert.selectors';
 import { loadAlertsByDevice, updateAlertStatus } from '../../state/threshold/threshold-alert.actions';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Device } from '../../model/device.model';
+import { selectAllDevices } from '../../state/device/device.selectors';
+import { loadDevices } from '../../state/device/device.actions';
+import { selectIsAdmin } from '../../state/auth/auth.selectors';
 
 
 @Component({
@@ -17,17 +21,40 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class AlertListComponent implements OnInit {
   filters = [
     { label: 'Toutes', value: 'all', active: true },
-    { label: 'Critiques', value: 'high', active: false },
-    { label: 'Moyennes', value: 'medium', active: false },
-    { label: 'Faibles', value: 'low', active: false }
+    { label: 'Non résolues', value: 'UNRESOLVED', active: false },
+    { label: 'En cours', value: 'RESOLVING', active: false },
+    { label: 'Résolues', value: 'RESOLVED', active: false }
   ];
 
-  alerts$: Observable<ThresholdAlert[]> = this.store.select(selectAllThresholdAlerts);
-  loading$: Observable<boolean> = this.store.select(selectThresholdAlertLoading);
+  selectedFilter = 'all'; 
 
+  alerts$: Observable<ThresholdAlert[]> = this.store.select(selectAllThresholdAlerts).pipe(
+    map(alerts => [...alerts].reverse()),
+    map(alerts => alerts.filter(alert => this.selectedFilter === 'all' || alert.status === this.selectedFilter))
+  );
+
+  loading$: Observable<boolean> = this.store.select(selectThresholdAlertLoading);
+  devices$: Observable<Device[]> = this.store.select(selectAllDevices);
+  deviceMap$!: Observable<Record<string, string>>;
+
+  showModal = false;
+  selectedAlert: ThresholdAlert | null = null;
   constructor(private store: Store, private route: ActivatedRoute, private router: Router) {}
 
+   isAdmin$!: Observable<boolean>;
+  
+
   ngOnInit(): void {
+    this.isAdmin$ = this.store.select(selectIsAdmin);
+    this.store.dispatch(loadDevices({ page: 0, size: 50 }));
+    this.deviceMap$ = this.devices$.pipe(
+      map((devices) => {
+        return devices.reduce((acc, device) => {
+          acc[device.id] = device.name;
+          return acc;
+        }, {} as Record<string, string>);
+      })
+    );
     this.route.queryParams.subscribe(params => {
       const deviceId = params['deviceId'];
       if (deviceId) {
@@ -38,6 +65,9 @@ export class AlertListComponent implements OnInit {
     });
   }
   
+  getDeviceName(deviceId: string, deviceMap: Record<string, string>): string {
+    return deviceMap[deviceId] || 'Appareil inconnu';
+  }
   getSeverityClass(status: string): string {
     return {
       UNRESOLVED: 'border-red-500',
@@ -54,9 +84,15 @@ export class AlertListComponent implements OnInit {
     }[status] || '';
   }
 
-  toggleFilter(filter: any) {
+ toggleFilter(filter: any) {
     this.filters.forEach(f => f.active = false);
     filter.active = true;
+    this.selectedFilter = filter.value;
+
+    this.alerts$ = this.store.select(selectAllThresholdAlerts).pipe(
+      map(alerts => [...alerts].reverse()),
+      map(alerts => alerts.filter(alert => this.selectedFilter === 'all' || alert.status === this.selectedFilter))
+    );
   }
 
   acknowledgeAlert(alert: ThresholdAlert) {
@@ -85,7 +121,12 @@ export class AlertListComponent implements OnInit {
   
 
   viewDetails(alert: ThresholdAlert) {
-    console.log('Viewing details for alert:', alert);
-    // Implement navigation to detailed view if needed
+    this.selectedAlert = alert;
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.selectedAlert = null;
   }
 }

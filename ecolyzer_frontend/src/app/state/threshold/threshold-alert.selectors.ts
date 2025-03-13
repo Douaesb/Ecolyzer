@@ -1,5 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { ThresholdAlertState } from '../threshold/threshold-alert.reducer';
+import { ThresholdAlert } from '../../model/threshold-alert.model';
 
 // Select the feature state
 export const selectThresholdAlertState = createFeatureSelector<ThresholdAlertState>('thresholdAlert');
@@ -26,4 +27,24 @@ export const selectThresholdAlertLoading = createSelector(
 export const selectThresholdAlertError = createSelector(
   selectThresholdAlertState,
   (state) => state.error
+);
+
+export const selectDevicesWithActiveAlerts = createSelector(
+  selectAllThresholdAlerts,
+  (alerts) => {
+    const latestAlertByDevice = new Map<string, ThresholdAlert>();
+
+    alerts.forEach(alert => {
+      if (!latestAlertByDevice.has(alert.deviceId) || 
+          (alert.updatedAt ?? 0) > (latestAlertByDevice.get(alert.deviceId)?.updatedAt ?? 0)) {
+        latestAlertByDevice.set(alert.deviceId, alert);
+      }
+    });
+
+    return new Set(
+      Array.from(latestAlertByDevice.values())
+        .filter(alert => alert.status !== 'RESOLVED')
+        .map(alert => alert.deviceId)
+    );
+  }
 );

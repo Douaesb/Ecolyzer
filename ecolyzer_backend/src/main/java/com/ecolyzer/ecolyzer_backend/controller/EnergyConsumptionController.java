@@ -4,6 +4,8 @@ import com.ecolyzer.ecolyzer_backend.model.EnergyConsumption;
 import com.ecolyzer.ecolyzer_backend.model.EnergyConsumptionSummary;
 import com.ecolyzer.ecolyzer_backend.service.EnergyConsumptionService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -54,12 +56,17 @@ public class EnergyConsumptionController {
     }
 
 
-    @GetMapping("/admin/summary/all")
+    @GetMapping({"/admin/summary/all","/user/summary/all", })
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<EnergyConsumptionSummary>> getAllEnergySummaries() {
-        return ResponseEntity.ok(energyConsumptionService.getAllEnergySummaries());
-    }
+    public ResponseEntity<Page<EnergyConsumptionSummary>> getAllEnergySummaries(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
+        Pageable pageable = PageRequest.of(page, size);
+        Page<EnergyConsumptionSummary> summaries = energyConsumptionService.getAllEnergySummaries(pageable);
+
+        return ResponseEntity.ok(summaries);
+    }
 
     @GetMapping("/admin/zone/{zoneName}/summary")
     @PreAuthorize("hasRole('ADMIN')")

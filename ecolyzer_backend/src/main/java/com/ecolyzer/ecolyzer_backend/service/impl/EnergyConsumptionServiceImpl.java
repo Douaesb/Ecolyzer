@@ -194,10 +194,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return energySummaryRepository.findByDeviceIdAndDate(deviceId, date);
     }
 
-    public List<EnergyConsumptionSummary> getAllEnergySummaries() {
-        return energySummaryRepository.findAll();
+    public Page<EnergyConsumptionSummary> getAllEnergySummaries(Pageable pageable) {
+        return energySummaryRepository.findAll(pageable);
     }
-
     public Optional<EnergyConsumptionSummary> getEnergySummaryByZone(String zoneName, LocalDate date, Pageable pageable) {
 
         Optional<Zone> zone = zoneRepository.findByName(zoneName);

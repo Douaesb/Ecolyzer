@@ -125,19 +125,22 @@ export class DeviceEffects {
     )
   );
 
-  // Get Devices By Zone
-  getDevicesByZone$ = createEffect(() =>
+  loadDevicesByZone$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DeviceActions.getDevicesByZone),
-      mergeMap(({ zoneId }) =>
-        this.deviceService.getDevicesByZone(zoneId).pipe(
-          tap(response => console.log("API Response in Effect:", response)),
-          map(response =>
-            DeviceActions.getDevicesByZoneSuccess({
-              devices: response
+      mergeMap(({ zoneId, page, pageSize }) =>
+        this.deviceService.getDevicesByZone(zoneId, page, pageSize).pipe(
+          tap((response) => console.log('API Response in Effect:', response)), // Debugging log
+          map((response) =>
+            DeviceActions.loadDevicesSuccess({
+              devices: response.content,
+              totalElements: response.totalElements,
+              totalPages: response.totalPages,
             })
           ),
-          catchError(error => of(DeviceActions.getDevicesByZoneFailure({ error: error.message })))
+          catchError((error) =>
+            of(DeviceActions.loadDevicesFailure({ error: error.message }))
+          )
         )
       )
     )

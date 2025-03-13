@@ -53,9 +53,9 @@ export class DeviceService {
     );
   }
 
-  getDevicesByZone(zoneId: string): Observable<Device[]> {
-    return this.roleEndpointService.getEndpoint(this.apiUrl, `/devices/zone/${zoneId}`).pipe(
-      switchMap(endpoint => this.http.get<Device[]>(endpoint))
+  getDevicesByZone(zoneId: string, page: number, pageSize: number):  Observable<PaginatedDevices> {  
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/devices/zone/${zoneId}?page=${page}&size=${pageSize}`).pipe(
+      switchMap(endpoint => this.http.get<PaginatedDevices>(endpoint))
     );
   }
 }

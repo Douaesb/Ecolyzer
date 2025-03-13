@@ -7,3 +7,18 @@ export const selectAllDevices = createSelector(selectDeviceState, state => state
 export const selectDeviceLoading = createSelector(selectDeviceState, state => state.loading);
 
 export const selectDeviceError = createSelector(selectDeviceState, state => state.error);
+
+export const selectDevices = createSelector(
+    selectDeviceState,
+    (state) => state.devices
+  );
+  
+  export const selectTotalPages = createSelector(
+    selectDeviceState,
+    (state) => state.totalPages
+  );
+  
+  export const selectIsLoading = createSelector(
+    selectDeviceState,
+    (state) => state.loading
+  );

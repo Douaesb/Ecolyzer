@@ -9,7 +9,7 @@ import java.util.List;
 public interface DeviceService {
 
     Page<DeviceResponseDTO> getAllDevices(int page, int size);
-    List<DeviceResponseDTO> getDevicesByZone(String zoneId, int page, int size);
+    Page<DeviceResponseDTO> getDevicesByZone(String zoneId, int page, int size);
 
     DeviceResponseDTO createDevice(DeviceRequestDTO dto);
 

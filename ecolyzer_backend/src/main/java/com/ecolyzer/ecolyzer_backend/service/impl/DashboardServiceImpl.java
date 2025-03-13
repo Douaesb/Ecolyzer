@@ -48,14 +48,12 @@ public class DashboardServiceImpl implements DashboardService {
 
         log.debug("Total consumption: {}, Estimated cost: {}, EmpreinteC02: {}", totalConsumption, estimatedCost, empreinteC02);
 
-        // Get active and total alerts
         long activeAlerts = alertRepo.countByStatus(AlertStatus.valueOf("UNRESOLVED"));
-//        long totalAlerts = Optional.ofNullable(alertRepo.countAllInPeriod(startDate)).orElse(0L);
         log.debug("Active alerts: {}", activeAlerts);
 
-        // Get energy consumption records and map to DTOs
         List<EnergyConsumption> energyConsumptions = energyRepo.findByTimestampAfter(startDate);
         List<EnergyConsumptionSummaryDTO> consumptionSummaries = energyConsumptions.stream()
+                .filter(ec -> ec.getDevice() != null)
                 .map(consumption -> new EnergyConsumptionSummaryDTO(
                         consumption.getDevice().getId(),                   // Device ID
                         consumption.getDevice().getName(),                 // Device name

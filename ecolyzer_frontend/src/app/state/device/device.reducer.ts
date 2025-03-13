@@ -118,16 +118,19 @@ export const deviceReducer = createReducer(
   })),
 
   // Get devices by zone with pagination
-  on(DeviceActions.getDevicesByZone, (state) => ({ ...state, loading: true })),
-  on(DeviceActions.getDevicesByZoneSuccess, (state, { devices }) => {
-    console.log('Reducer updating state with devices:', devices);
-    return {
-      ...state,
-      devices, 
-      loading: false,
-      error: null
-    };
-  }),
+  on(DeviceActions.getDevicesByZone, (state) => ({
+    ...state,
+    loading: true,
+  })),
+  
+  on(DeviceActions.getDevicesByZoneSuccess, (state,  { devices, totalElements, totalPages }) => ({
+    ...state,
+    loading: false,
+    devices,
+    totalElements,
+    totalPages,
+    error: null,
+  })),
   
   on(DeviceActions.getDevicesByZoneFailure, (state, { error }) => ({
     ...state,

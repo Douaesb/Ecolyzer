@@ -102,4 +102,12 @@ public class ThresholdAlertServiceImpl implements ThresholdAlertService {
         }
         thresholdAlertRepository.deleteById(id);
     }
+
+    @Override
+    public List<ThresholdAlertResponseDTO> getAllActiveAlerts() {
+        return thresholdAlertRepository.findByActiveTrue()
+                .stream()
+                .map(thresholdAlertMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
 }

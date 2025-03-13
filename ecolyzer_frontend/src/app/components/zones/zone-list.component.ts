@@ -9,6 +9,8 @@ import { selectAllZones, selectZoneLoading } from '../../state/zone/zone.selecto
 import { Store } from '@ngrx/store';
 import { createZone, deleteZone, loadZones, updateZone } from '../../state/zone/zone.actions';
 import { FormsModule } from '@angular/forms';
+import { selectIsAdmin } from '../../state/auth/auth.selectors';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-zone-list',
@@ -22,13 +24,20 @@ import { FormsModule } from '@angular/forms';
 export class ZoneListComponent implements OnInit {
   zones$: Observable<Zone[]> = this.store.select(selectAllZones);
   loading$: Observable<boolean> = this.store.select(selectZoneLoading);
-  
+  isAdmin$!: Observable<boolean>;
+
   selectedZone: Partial<Zone> | null = null;
 
-  constructor(private store: Store) {}
+  constructor(private store: Store, private router: Router) {}
 
   ngOnInit(): void {
     this.store.dispatch(loadZones({ page: 0, size: 10 }));
+    this.isAdmin$ = this.store.select(selectIsAdmin);
+
+  }
+
+  goToDevices(zoneId: string): void {
+    this.router.navigate(['/devices', zoneId]); 
   }
 
   openEditModal(zone: Zone | null): void {

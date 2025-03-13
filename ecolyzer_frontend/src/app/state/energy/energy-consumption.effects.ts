@@ -36,12 +36,17 @@ export class EnergyEffects {
   loadAllEnergySummaries$ = createEffect(() =>
     this.actions$.pipe(
       ofType(EnergyActions.loadAllEnergySummaries),
-      mergeMap(() =>
-        this.energyService.getAllEnergySummaries().pipe(
-          map((summaries) => EnergyActions.loadAllEnergySummariesSuccess({ summaries })),
+      mergeMap(({ page, size }) =>
+        this.energyService.getAllEnergySummaries(page, size).pipe(
+          map((response) => EnergyActions.loadAllEnergySummariesSuccess({ 
+            summaries: response.content, 
+            totalElements: response.totalElements, 
+            totalPages: response.totalPages 
+          })),
           catchError((error) => of(EnergyActions.loadAllEnergySummariesFailure({ error: error.message })))
         )
       )
     )
   );
+  
 }

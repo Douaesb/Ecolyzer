@@ -40,4 +40,10 @@ public class ThresholdAlertController {
         thresholdAlertService.deleteThresholdAlert(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping({"/user/threshold-alerts/active", "/admin/threshold-alerts/active"})
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<List<ThresholdAlertResponseDTO>> getAllActiveAlerts() {
+        return ResponseEntity.ok(thresholdAlertService.getAllActiveAlerts());
+    }
 }

@@ -3,6 +3,7 @@ package com.ecolyzer.ecolyzer_backend.service;
 import com.ecolyzer.ecolyzer_backend.model.EnergyConsumption;
 import com.ecolyzer.ecolyzer_backend.model.EnergyConsumptionSummary;
 import com.ecolyzer.ecolyzer_backend.model.SensorData;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -14,8 +15,7 @@ public interface EnergyConsumptionService {
     Optional<EnergyConsumption> getCurrentEnergyConsumption(String deviceId);
 
     Optional<EnergyConsumptionSummary> getEnergySummaryByDeviceAndDate(String deviceId, LocalDate date);
-    List<EnergyConsumptionSummary> getAllEnergySummaries();
-
+    Page<EnergyConsumptionSummary> getAllEnergySummaries(Pageable pageable);
     Optional<EnergyConsumptionSummary> getEnergySummaryByZone(String zoneName, LocalDate date, Pageable pageable);
 
     void generateDailyEnergySummary();

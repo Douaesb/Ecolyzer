@@ -21,7 +21,7 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-    // canActivate: [() => AuthGuard(['ROLE_USER', 'ROLE_ADMIN'])],
+    canActivate: [() => AuthGuard(['ROLE_USER', 'ROLE_ADMIN'])],
     children: [
       {
         path: 'dashboard',
@@ -30,6 +30,11 @@ export const routes: Routes = [
       },
       {
         path: 'devices',
+        loadComponent: () =>
+          import('./components/devices/device-list.component').then(m => m.DeviceListComponent),
+      },
+      {
+        path: 'devices/:zoneId',
         loadComponent: () =>
           import('./components/devices/device-list.component').then(m => m.DeviceListComponent),
       },

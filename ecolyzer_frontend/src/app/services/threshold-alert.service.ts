@@ -22,6 +22,12 @@ export class ThresholdAlertService {
     );
   }
 
+  getAllActiveAlerts(): Observable<ThresholdAlert[]> {
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/threshold-alerts/active`).pipe(
+      switchMap(endpoint => this.http.get<ThresholdAlert[]>(endpoint))
+    );
+  }
+
   updateAlertStatus(alertId: string, status: string): Observable<ThresholdAlert> {
     const params = new HttpParams().set('status', status);
     return this.roleEndpointService.getEndpoint(this.apiUrl, `/alerts/${alertId}/status`).pipe(

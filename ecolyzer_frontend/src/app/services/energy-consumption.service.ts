@@ -42,12 +42,13 @@ export class EnergyConsumptionService {
     );
   }
 
-  getAllEnergySummaries(): Observable<EnergyConsumptionSummary[]> {
-    return this.roleEndpointService.getEndpoint(this.apiUrl, '/summary/all').pipe(
-      switchMap(endpoint => this.http.get<EnergyConsumptionSummary[]>(endpoint)),
+  getAllEnergySummaries(page: number, size: number): Observable<{ content: EnergyConsumptionSummary[], totalElements: number, totalPages: number }> {
+    return this.roleEndpointService.getEndpoint(this.apiUrl, `/summary/all?page=${page}&size=${size}`).pipe(
+      switchMap(endpoint => this.http.get<{ content: EnergyConsumptionSummary[], totalElements: number, totalPages: number }>(endpoint)),
       catchError(this.handleError)
     );
   }
+  
 
   getZoneEnergySummary(zoneName: string, date?: string): Observable<EnergyConsumptionSummary> {
     const query = date ? `?date=${date}` : '';

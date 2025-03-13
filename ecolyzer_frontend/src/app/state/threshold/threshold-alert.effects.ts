@@ -11,6 +11,18 @@ export class ThresholdAlertEffects {
     private thresholdAlertService: ThresholdAlertService
   ) {}
 
+  loadAllActiveAlerts$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ThresholdAlertActions.loadAllActiveAlerts),
+      mergeMap(() =>
+        this.thresholdAlertService.getAllActiveAlerts().pipe(
+          map(alerts => ThresholdAlertActions.loadAllActiveAlertsSuccess({ alerts })),
+          catchError(error => of(ThresholdAlertActions.loadAllActiveAlertsFailure({ error })))
+        )
+      )
+    )
+  );
+
   // Load alerts by device
   loadAlertsByDevice$ = createEffect(() =>
     this.actions$.pipe(
@@ -49,4 +61,6 @@ export class ThresholdAlertEffects {
       )
     )
   );
+
+  
 }

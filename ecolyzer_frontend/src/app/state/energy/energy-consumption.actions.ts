@@ -30,10 +30,13 @@ export const loadDailyEnergySummaryFailure = createAction(
 );
 
 // Load all summaries
-export const loadAllEnergySummaries = createAction('[Energy] Load All Energy Summaries');
+export const loadAllEnergySummaries = createAction(
+  '[Energy] Load All Energy Summaries',
+  props<{ page: number; size: number }>()
+);
 export const loadAllEnergySummariesSuccess = createAction(
   '[Energy] Load All Energy Summaries Success',
-  props<{ summaries: EnergyConsumptionSummary[] }>()
+  props<{ summaries: EnergyConsumptionSummary[], totalElements: number, totalPages: number }>()
 );
 export const loadAllEnergySummariesFailure = createAction(
   '[Energy] Load All Energy Summaries Failure',

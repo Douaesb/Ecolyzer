@@ -60,7 +60,7 @@ public class DeviceController {
 
     @GetMapping({"/user/devices/zone/{zoneId}", "/admin/devices/zone/{zoneId}"})
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public List<DeviceResponseDTO> getDevicesByZone(@PathVariable String zoneId,
+    public Page<DeviceResponseDTO> getDevicesByZone(@PathVariable String zoneId,
                                                     @RequestParam(defaultValue = "0") int page,
                                                     @RequestParam(defaultValue = "5") int size) {
         return deviceService.getDevicesByZone(zoneId, page, size);

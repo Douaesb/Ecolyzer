@@ -82,7 +82,7 @@
               clip-rule="evenodd"
             />
           </svg>
-          {{ alert.timestamp }}
+          {{ alert.timestamp | date: 'dd MMM yyyy, HH:mm:ss' }}
         </div>
         <div class="flex items-center">
           <svg
@@ -97,22 +97,75 @@
               clip-rule="evenodd"
             />
           </svg>
-          {{ alert.deviceId }}
+          <ng-container *ngIf="deviceMap$ | async as deviceMap">
+            {{ getDeviceName(alert.deviceId, deviceMap) }}
+          </ng-container>
         </div>
       </div>
 
-      <div class="flex justify-end space-x-2">
-        <button
-          class="btn-secondary"
-          (click)="acknowledgeAlert(alert)"
-          [disabled]="alert.status === 'RESOLVED'"
-        >
-          {{ getActionLabel(alert.status) }}
-        </button>
+      <div class="flex justify-end space-x-2" >
+        <ng-container *ngIf="alert.status !== 'RESOLVED'; else resolvedTag " >
+          <button *ngIf="isAdmin$ | async"
+            class="px-4 py-2 rounded-lg font-semibold text-white"
+            [ngClass]="{
+              'bg-red-500 hover:bg-red-600': alert.status === 'UNRESOLVED',
+              'bg-yellow-500 hover:bg-yellow-600': alert.status === 'RESOLVING'
+            }"
+            (click)="acknowledgeAlert(alert)"
+          >
+            {{ getActionLabel(alert.status) }}
+          </button>
+        </ng-container>
+
+        <ng-template #resolvedTag>
+          <span
+            class="px-3 py-1 rounded-lg bg-green-100 text-green-600 font-semibold"
+          >
+            Resolved
+          </span>
+        </ng-template>
 
         <button class="btn-primary" (click)="viewDetails(alert)">
           Détails
         </button>
+      </div>
+
+      <!-- Modal Overlay -->
+      <div
+        *ngIf="showModal"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10 z-50"
+      >
+        <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            Détails de l'alerte
+          </h2>
+
+          <div class="space-y-2">
+            <p><strong>ID:</strong> {{ selectedAlert?.id }}</p>
+            <p><strong>Device ID:</strong> {{ selectedAlert?.deviceId }}</p>
+            <ng-container *ngIf="deviceMap$ | async as deviceMap">
+              {{ getDeviceName(alert.deviceId, deviceMap) }}
+            </ng-container>
+            <p>
+              <strong>Threshold:</strong> {{ selectedAlert?.thresholdValue }}
+            </p>
+            <p><strong>Message:</strong> {{ selectedAlert?.alertMessage }}</p>
+            <p><strong>Status:</strong> {{ selectedAlert?.status }}</p>
+            <p><strong>Timestamp:</strong> {{ selectedAlert?.timestamp | date: 'dd MMM yyyy, HH:mm:ss' }}</p>
+            <p *ngIf="selectedAlert?.updatedAt != null">
+              <strong>Updated At:</strong> {{ selectedAlert?.updatedAt | date: 'dd MMM yyyy, HH:mm:ss' }}
+            </p>
+          </div>
+
+          <div class="mt-4 flex justify-end space-x-2">
+            <button
+              class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
+              (click)="closeModal()"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

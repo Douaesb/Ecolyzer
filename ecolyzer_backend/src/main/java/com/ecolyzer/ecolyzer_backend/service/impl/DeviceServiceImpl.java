@@ -47,14 +47,11 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     @Override
-    public List<DeviceResponseDTO> getDevicesByZone(String zoneId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Device> devicePage = deviceRepository.findByZoneId(zoneId, pageable);
-        return devicePage.getContent().stream()
-                .map(deviceMapper::toResponseDTO)
-                .toList();
-    }
+    public Page<DeviceResponseDTO> getDevicesByZone(String zoneId, int page, int size) {
+        return deviceRepository.findByZoneId(zoneId, PageRequest.of(page, size))
+                .map(deviceMapper::toResponseDTO);
 
+    }
 
     @Override
     @Transactional

@@ -48,3 +48,17 @@ export const deleteAlertFailure = createAction(
   '[ThresholdAlert] Delete Alert Failure',
   props<{ error: string }>()
 );
+
+export const loadAllActiveAlerts = createAction(
+  '[Threshold Alert] Load All Active Alerts'
+);
+
+export const loadAllActiveAlertsSuccess = createAction(
+  '[Threshold Alert] Load All Active Alerts Success',
+  props<{ alerts: ThresholdAlert[] }>()
+);
+
+export const loadAllActiveAlertsFailure = createAction(
+  '[Threshold Alert] Load All Active Alerts Failure',
+  props<{ error: any }>()
+);

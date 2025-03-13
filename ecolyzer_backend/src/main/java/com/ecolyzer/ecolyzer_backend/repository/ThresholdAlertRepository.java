@@ -23,5 +23,6 @@ public interface ThresholdAlertRepository extends MongoRepository<ThresholdAlert
     Long countAllInPeriod(LocalDateTime startDate);
     List<ThresholdAlert> findByTimestampAfter(LocalDateTime startDate);
     int countByDeviceAndStatus(Device device, String status);
+    List<ThresholdAlert> findByActiveTrue();
 
 }

@@ -2,7 +2,7 @@
     <h2 class="text-2xl font-bold text-gray-800 mb-4">Energy Consumption Overview</h2>
   
     <!-- Loading & Error Handling -->
-    <div *ngIf="loading$ | async" class="text-blue-600 font-semibold">Loading...</div>
+    <div *ngIf="loading$ | async" class="text-black-600 font-semibold">Loading...</div>
     <div *ngIf="error$ | async as error" class="text-red-600 font-semibold">Error: {{ error }}</div>
   
     <!-- Current Energy Consumption -->
@@ -22,29 +22,61 @@
       <p class="text-gray-600"><strong>Alert Count:</strong> {{ summary.alertCount }}</p>
     </div>
   
-    <!-- All Energy Summaries -->
-    <div *ngIf="allSummaries$ | async as summaries" class="mt-6">
-      <h3 class="text-xl font-semibold text-gray-700 mb-2">All Energy Summaries</h3>
-      <div class="overflow-x-auto">
-        <table class="min-w-full border border-gray-300 bg-white shadow-md rounded-lg">
-          <thead>
-            <tr class="bg-gray-200 text-gray-700">
-              <th class="py-2 px-4 border">Device name</th>
-              <th class="py-2 px-4 border">Date</th>
-              <th class="py-2 px-4 border">Energy Consumption (kWh)</th>
-              <th class="py-2 px-4 border">Alert Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of summaries" class="hover:bg-gray-100">
-              <td class="py-2 px-4 border">{{ item.device.name }}</td>
-              <td class="py-2 px-4 border">{{ item.date }}</td>
-              <td class="py-2 px-4 border">{{ item.totalEnergyConsumption }}</td>
-              <td class="py-2 px-4 border">{{ item.alertCount }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+  <!-- All Energy Summaries -->
+<div *ngIf="allSummaries$ | async as summaries" class="mt-6">
+  <h3 class="text-xl font-semibold text-gray-700 mb-2">All Energy Summaries</h3>
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-300 bg-white shadow-md rounded-lg">
+      <thead>
+        <tr class="bg-gray-200 text-gray-700">
+          <th class="py-2 px-4 border">Device name</th>
+          <th class="py-2 px-4 border">Date</th>
+          <th class="py-2 px-4 border">Energy Consumption (kWh)</th>
+          <th class="py-2 px-4 border">Alert Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of summaries" class="hover:bg-gray-100">
+          <td class="py-2 px-4 border">{{ item.device?.name }}</td>
+          <td class="py-2 px-4 border">{{ item.date }}</td>
+          <td class="py-2 px-4 border">{{ item.totalEnergyConsumption }}</td>
+          <td class="py-2 px-4 border">{{ item.alertCount }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Controls -->
+  <div class="flex flex-col items-center" *ngIf="totalPages$ | async as totalPages">
+   
+  
+    <!-- Buttons -->
+    <div class="inline-flex mt-2 xs:mt-0">
+        <button (click)="prevPage()" [disabled]="page === 0"
+          class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-emerald-500 rounded-s 
+                 hover:bg-emerald-600 disabled:opacity-50">
+            Prev
+        </button>
+        
+        <button (click)="nextPage()" [disabled]="page === totalPages - 1"
+          class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-emerald-500 border-0 
+                 border-s border-emerald-600 rounded-e hover:bg-emerald-700 disabled:opacity-50">
+            Next
+        </button>
+    </div> 
+    <!-- Help text -->
+    <span class="text-sm text-gray-700">
+        Showing 
+        <span class="font-semibold text-gray-900 ">{{ getStartIndex() + 1 }}</span> 
+        to 
+        <span class="font-semibold text-gray-900 ">{{ getEndIndex() }}</span> 
+        of 
+        <span class="font-semibold text-gray-900 ">{{ totalEntries }}</span> Entries
+    </span>
+  </div>
+  
+
+</div>
+
   </div>
   

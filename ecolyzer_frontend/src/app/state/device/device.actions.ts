@@ -33,17 +33,17 @@ export const filterDevicesFailure = createAction('[Device] Filter Devices Failur
 
 // Get devices by zone
 export const getDevicesByZone = createAction(
-    '[Device] Get Devices By Zone',
-    props<{ zoneId: string }>()
-  );
-  
-  export const getDevicesByZoneSuccess = createAction(
-    '[Device] Get Devices By Zone Success',
-    props<{ devices: Device[] }>()
-  );
-  
-  export const getDevicesByZoneFailure = createAction(
-    '[Device] Get Devices By Zone Failure',
-    props<{ error: string }>()
-  );
+  '[Device] Get Devices By Zone',
+  props<{ zoneId: string; page: number; pageSize: number }>()
+);
+
+export const getDevicesByZoneSuccess = createAction(
+  '[Device] Get Devices By Zone Success',
+  props<{ devices: Device[] , totalElements: number, totalPages: number }>() 
+);
+
+export const getDevicesByZoneFailure = createAction(
+  '[Device] Get Devices By Zone Failure',
+  props<{ error: string }>()
+);
   

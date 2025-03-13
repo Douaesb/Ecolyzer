@@ -12,5 +12,6 @@ public interface ThresholdAlertService {
     ThresholdAlertResponseDTO updateThresholdAlert(String id, ThresholdAlertRequestDTO requestDTO);
     void deleteThresholdAlert(String id);
     ThresholdAlertResponseDTO updateThresholdAlertStatus(String id, AlertStatus status);
+    List<ThresholdAlertResponseDTO> getAllActiveAlerts();
 
 }
