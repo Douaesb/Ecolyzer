@@ -1,0 +1,47 @@
+services:
+  app:
+    build: .
+    container_name: ecolyzer-app
+    restart: always
+    depends_on:
+      - mongodb
+      - rabbitmq
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE : dev
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/ecolyzer_dev
+      SPRING_RABBITMQ_HOST: rabbitmq
+    networks:
+      - ecolyzer-network
+
+  mongodb:
+    image: mongo:6.0
+    container_name: ecolyzer-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - ecolyzer-network
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: ecolyzer-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - ecolyzer-network
+
+volumes:
+  mongo-data:
+
+networks:
+  ecolyzer-network:
+    driver: bridge

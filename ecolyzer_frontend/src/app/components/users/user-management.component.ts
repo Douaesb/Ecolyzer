@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { selectAllUsers, selectUsersLoading } from '../../state/user/user.selectors';
+import { selectAllUsers, selectUsersLoading, selectUsersWithRoleUser } from '../../state/user/user.selectors';
 import { Store } from '@ngrx/store';
 import { approveUser, deleteUser, loadUsers, updateUserRoles } from '../../state/user/user.actions';
 import { User } from '../../model/user.model';
@@ -15,7 +15,9 @@ import { User } from '../../model/user.model';
   templateUrl: './user-management.component.html',
 })
 export class UserManagementComponent implements OnInit {
-  users$: Observable<User[]> = this.store.select(selectAllUsers);
+  allUsers$: Observable<User[]> = this.store.select(selectAllUsers);
+  users$: Observable<User[]> = this.store.select(selectUsersWithRoleUser);
+
   loading$: Observable<boolean> = this.store.select(selectUsersLoading);
   selectedUser: User | null = null;
   selectedRoles: string[] = [];

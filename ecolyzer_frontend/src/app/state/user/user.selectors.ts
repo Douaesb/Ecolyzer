@@ -12,3 +12,8 @@ export const selectUsersLoading = createSelector(selectUserState, (state) => sta
 
 // Select Error
 export const selectUsersError = createSelector(selectUserState, (state) => state.error);
+
+export const selectUsersWithRoleUser = createSelector(
+    selectAllUsers,
+    (users) => users.filter(user => user.roles.includes('ROLE_USER'))
+);

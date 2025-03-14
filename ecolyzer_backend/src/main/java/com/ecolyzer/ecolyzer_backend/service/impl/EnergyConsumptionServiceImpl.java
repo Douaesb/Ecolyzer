@@ -118,7 +118,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         checkAndGenerateAlert(device, newConsumption);
     }
 
-    private void checkAndGenerateAlert(Device device, double newConsumption) {
+    public void checkAndGenerateAlert(Device device, double newConsumption) {
         Optional<ThresholdAlert> existingAlert = thresholdAlertRepository.findByDeviceIdAndActive(device.getId(), true);
 
         if (device.getEnergyThreshold() != null && newConsumption >= device.getEnergyThreshold()) {

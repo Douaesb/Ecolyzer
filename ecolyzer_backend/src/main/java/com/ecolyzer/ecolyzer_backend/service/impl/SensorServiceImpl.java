@@ -3,12 +3,15 @@ package com.ecolyzer.ecolyzer_backend.service.impl;
 import com.ecolyzer.ecolyzer_backend.model.Capteur;
 import com.ecolyzer.ecolyzer_backend.repository.CapteurRepository;
 import com.ecolyzer.ecolyzer_backend.service.SensorService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
+@Slf4j
 public class SensorServiceImpl implements SensorService {
 
     private final CapteurRepository capteurRepository;
@@ -17,12 +20,15 @@ public class SensorServiceImpl implements SensorService {
         this.capteurRepository = capteurRepository;
     }
 
-    public String getRandomCapteurId() {
+    public Optional<String> getRandomCapteurId() {
         List<Capteur> capteurs = capteurRepository.findAll();
+
         if (capteurs.isEmpty()) {
-            throw new RuntimeException("No Capteurs found in the database!");
+            log.warn("⚠️ No Capteurs found in the database!");
+            return Optional.empty(); // Return an empty Optional instead of throwing an exception
         }
+
         Random random = new Random();
-        return capteurs.get(random.nextInt(capteurs.size())).getId();
+        return Optional.of(capteurs.get(random.nextInt(capteurs.size())).getId());
     }
 }

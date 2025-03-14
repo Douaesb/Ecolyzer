@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -34,11 +35,18 @@ public class SensorDataProducer {
 
     @Scheduled(fixedRate = 5000)
     public void sendFakeSensorData() {
-        String randomCapteurId = sensorService.getRandomCapteurId();
+        Optional<String> capteurIdOpt = sensorService.getRandomCapteurId();
 
+        if (capteurIdOpt.isEmpty()) {
+            logger.warn("⚠️ No Capteurs available, skipping sensor data generation.");
+            return; // Avoid errors when there are no sensors
+        }
+
+        String randomCapteurId = capteurIdOpt.get();
         Capteur capteur = capteurRepository.findById(randomCapteurId).orElse(null);
+
         if (capteur == null) {
-            logger.warn("No valid Capteur found! Cannot send data.");
+            logger.warn("⚠️ No valid Capteur found in DB, skipping sensor data generation.");
             return;
         }
 
@@ -54,4 +62,5 @@ public class SensorDataProducer {
         rabbitTemplate.convertAndSend(SENSOR_EXCHANGE, SENSOR_ROUTING_KEY, data);
         logger.info("✅ Message sent successfully!");
     }
+
 }

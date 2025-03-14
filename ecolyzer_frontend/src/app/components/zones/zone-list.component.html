@@ -65,8 +65,8 @@
     <div *ngIf="(zones$ | async)?.length === 0" class="bg-white rounded-lg p-8 text-center shadow-md">
       <span class="material-icons text-gray-400 text-5xl mb-4">domain_disabled</span>
       <h2 class="text-xl font-semibold text-gray-700 mb-2">Pas de zones configurées</h2>
-      <p class="text-gray-500 mb-6">Commencez par créer une nouvelle zone pour voir ses statistiques</p>
-      <button 
+      <p  *ngIf="isAdmin$ | async" class="text-gray-500 mb-6">Commencez par créer une nouvelle zone pour voir ses statistiques</p>
+      <button  *ngIf="isAdmin$ | async"
         class="px-4 py-2 bg-indigo-600 text-white rounded-lg flex items-center mx-auto"
         (click)="openEditModal(null)">
         <span class="material-icons mr-2">add</span>

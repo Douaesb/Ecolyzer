@@ -51,7 +51,14 @@ export class UserEffects {
             )
         )
     );
-
+    
+    approveUserSuccess$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(UserActions.approveUserSuccess),
+            map(() => UserActions.loadUsers()) 
+        )
+    );
+    
     // Delete User
     deleteUser$ = createEffect(() =>
         this.actions$.pipe(
