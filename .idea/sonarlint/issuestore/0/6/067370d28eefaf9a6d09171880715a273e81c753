@@ -1,0 +1,8 @@
+
+X	java:S1255"<This block of commented-out lines of code should be removed.(âô¸8¤Òüû×2
+o
+java:S6204B"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ª™¨¹8Éáûû×2
+o
+java:S6204P"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ª™¨¹8Ìáûû×2
+o
+java:S6204^"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ª™¨¹8Îáûû×2

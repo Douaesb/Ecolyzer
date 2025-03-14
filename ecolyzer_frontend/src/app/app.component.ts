@@ -1,13 +1,17 @@
+// app.component.ts
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ArcElement, BarElement, Chart, DoughnutController } from 'chart.js';
+import { LineController, LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale, BarController } from 'chart.js';
+Chart.register(LineController, LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale, DoughnutController, ArcElement, BarElement,BarController);
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'ecolyzer_frontend';
+  title = 'Eco Energy Platform';
 }
