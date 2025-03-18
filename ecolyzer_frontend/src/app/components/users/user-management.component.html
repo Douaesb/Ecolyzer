@@ -1,77 +1,112 @@
-<div class="container mx-auto px-4 py-8">
-  <h1 class="text-2xl font-bold mb-6">User Management</h1>
+<div class="container mx-auto px-4 py-6">
+  <h1 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">User Management</h1>
 
-  <!-- User List -->
-  <div class="bg-white shadow-md rounded-lg overflow-hidden">
+  <!-- User List - Desktop View (hidden on small screens) -->
+  <div class="hidden md:block bg-white shadow-md rounded-lg overflow-hidden">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
-          <th
-            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-          >
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Name
           </th>
-          <th
-            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-          >
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Email
           </th>
-          <th
-            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-          >
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Role
           </th>
-          <th
-            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-          >
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Actions
           </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <tr *ngFor="let user of users$ | async">
-          <td class="px-6 py-4 whitespace-nowrap">{{ user.username }}</td>
-          <td class="px-6 py-4 whitespace-nowrap">{{ user.email }}</td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            {{ user.formattedRoles }}
-
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-6">
-            <button
-              (click)="openEditModal(user)"
-              class="text-indigo-600 hover:text-indigo-900 mr-2"
-            >
-              Edit Role
-            </button>
-            <button
-              *ngIf="!user.approved; else approvedText"
-              (click)="onApproveUser(user.id)"
-              class="text-yellow-600 hover:text-yellow-900"
-            >
-              Approve User
-            </button>
-            <ng-template #approvedText>
-              <span class="text-green-600 font-semibold">Approved</span>
-            </ng-template>
-            <button
-            (click)="onDeleteUser(user.id)"
-            class="text-red-600 hover:text-red-900 mr-2"
-          >
-            Delete
-          </button>
+          <td class="px-4 py-3 whitespace-nowrap">{{ user.username }}</td>
+          <td class="px-4 py-3 whitespace-nowrap">{{ user.email }}</td>
+          <td class="px-4 py-3 whitespace-nowrap">{{ user.formattedRoles }}</td>
+          <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
+            <div class="flex flex-wrap gap-2 md:gap-4">
+              <button
+                (click)="openEditModal(user)"
+                class="text-indigo-600 hover:text-indigo-900"
+              >
+                Edit Role
+              </button>
+              <button
+                *ngIf="!user.approved; else approvedTextDesktop"
+                (click)="onApproveUser(user.id)"
+                class="text-yellow-600 hover:text-yellow-900"
+              >
+                Approve
+              </button>
+              <ng-template #approvedTextDesktop>
+                <span class="text-green-600 font-semibold">Approved</span>
+              </ng-template>
+              <button
+                (click)="onDeleteUser(user.id)"
+                class="text-red-600 hover:text-red-900"
+              >
+                Delete
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
+  <!-- User List - Mobile View (shown only on small screens) -->
+  <div class="md:hidden space-y-4">
+    <div *ngFor="let user of users$ | async" class="bg-white shadow rounded-lg p-4">
+      <div class="flex justify-between items-start mb-2">
+        <div>
+          <h3 class="font-medium">{{ user.username }}</h3>
+          <p class="text-sm text-gray-600">{{ user.email }}</p>
+        </div>
+        <div class="text-sm font-medium">
+          <span [ngClass]="{'text-green-600': user.approved, 'text-yellow-600': !user.approved}">
+            {{ user.approved ? 'Approved' : 'Pending' }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="mb-2">
+        <span class="text-xs font-medium text-gray-500 uppercase">Role</span>
+        <p>{{ user.formattedRoles }}</p>
+      </div>
+      
+      <div class="flex flex-wrap gap-3 pt-2 border-t border-gray-100">
+        <button
+          (click)="openEditModal(user)"
+          class="text-sm text-indigo-600 hover:text-indigo-900"
+        >
+          Edit Role
+        </button>
+        <button
+          *ngIf="!user.approved"
+          (click)="onApproveUser(user.id)"
+          class="text-sm text-yellow-600 hover:text-yellow-900"
+        >
+          Approve User
+        </button>
+        <button
+          (click)="onDeleteUser(user.id)"
+          class="text-sm text-red-600 hover:text-red-900"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Edit User Modal -->
   <div
     *ngIf="selectedUser"
-    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center px-4"
   >
     <div
-      class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white"
+      class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white"
     >
       <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">
         Edit User
@@ -100,14 +135,13 @@
             name="email"
             [(ngModel)]="selectedUser.email"
             readonly
-
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
         </div>
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700">Role</label>
-          <div class="mt-2">
-            <label class="inline-flex items-center">
+          <div class="mt-2 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:space-x-6">
+            <label class="flex items-center">
               <input
                 type="checkbox"
                 [checked]="selectedRoles.includes('ROLE_ADMIN')"
@@ -116,7 +150,7 @@
               />
               <span class="ml-2">Admin</span>
             </label>
-            <label class="inline-flex items-center ml-4">
+            <label class="flex items-center">
               <input
                 type="checkbox"
                 [checked]="selectedRoles.includes('ROLE_USER')"
@@ -128,17 +162,17 @@
           </div>
         </div>
                 
-        <div class="flex justify-end">
+        <div class="flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-2">
           <button
             type="button"
             (click)="closeEditModal()"
-            class="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Cancel
           </button>
           <button
             type="submit"
-            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Save Changes
           </button>
