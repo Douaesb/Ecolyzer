@@ -1,82 +1,94 @@
-<div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">Energy Consumption Overview</h2>
-  
-    <!-- Loading & Error Handling -->
-    <div *ngIf="loading$ | async" class="text-black-600 font-semibold">Loading...</div>
-    <div *ngIf="error$ | async as error" class="text-red-600 font-semibold">Error: {{ error }}</div>
-  
-    <!-- Current Energy Consumption -->
-    <div *ngIf="currentConsumption$ | async as consumption" class="p-4 border rounded-lg shadow-md bg-gray-50">
-      <h3 class="text-xl font-semibold text-gray-700 mb-2">Current Energy Consumption</h3>
-      <p class="text-gray-600"><strong>Device name:</strong> {{ consumption.device.name }}</p>
-      <p class="text-gray-600"><strong>Total Consumption:</strong> {{ consumption.totalConsumption }} kWh</p>
-      <p class="text-gray-600"><strong>Timestamp:</strong> {{ consumption.timestamp | date:'short' }}</p>
-    </div>
-  
-    <!-- Daily Energy Summary -->
-    <div *ngIf="dailySummary$ | async as summary" class="p-4 border rounded-lg shadow-md bg-gray-50 mt-4">
-      <h3 class="text-xl font-semibold text-gray-700 mb-2">Daily Energy Summary</h3>
-      <p class="text-gray-600"><strong>Device name:</strong> {{ summary.device.name }}</p>
-      <p class="text-gray-600"><strong>Date:</strong> {{ summary.date }}</p>
-      <p class="text-gray-600"><strong>Total Energy Consumption:</strong> {{ summary.totalEnergyConsumption }} kWh</p>
-      <p class="text-gray-600"><strong>Alert Count:</strong> {{ summary.alertCount }}</p>
-    </div>
-  
-  <!-- All Energy Summaries -->
-<div *ngIf="allSummaries$ | async as summaries" class="mt-6">
-  <h3 class="text-xl font-semibold text-gray-700 mb-2">All Energy Summaries</h3>
-  <div class="overflow-x-auto">
-    <table class="min-w-full border border-gray-300 bg-white shadow-md rounded-lg">
-      <thead>
-        <tr class="bg-gray-200 text-gray-700">
-          <th class="py-2 px-4 border">Device name</th>
-          <th class="py-2 px-4 border">Date</th>
-          <th class="py-2 px-4 border">Energy Consumption (kWh)</th>
-          <th class="py-2 px-4 border">Alert Count</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of summaries" class="hover:bg-gray-100">
-          <td class="py-2 px-4 border">{{ item.device?.name }}</td>
-          <td class="py-2 px-4 border">{{ item.date }}</td>
-          <td class="py-2 px-4 border">{{ item.totalEnergyConsumption }}</td>
-          <td class="py-2 px-4 border">{{ item.alertCount }}</td>
-        </tr>
-      </tbody>
-    </table>
+<div class="max-w-4xl mx-auto p-3 sm:p-6 bg-white shadow-lg rounded-lg">
+  <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Energy Consumption Overview</h2>
+
+  <!-- Download Buttons - Responsive Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
+    <button (click)="downloadCSV()" 
+      class="px-3 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 flex items-center justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <span class="whitespace-nowrap">Download CSV</span>
+    </button>
+    
+    <button (click)="downloadPDF()" 
+      class="px-3 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600 flex items-center justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <span class="whitespace-nowrap">Download PDF</span>
+    </button>
+
+    <button (click)="downloadAllPagesCSV()" 
+      class="px-3 py-2 bg-green-500 text-white text-sm rounded hover:bg-green-600 flex items-center justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <span class="whitespace-nowrap">All Pages CSV</span>
+    </button>
+
+    <button (click)="downloadAllPagesPDF()" 
+      class="px-3 py-2 bg-purple-500 text-white text-sm rounded hover:bg-purple-600 flex items-center justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <span class="whitespace-nowrap">All Pages PDF</span>
+    </button>
   </div>
 
-  <!-- Pagination Controls -->
-  <div class="flex flex-col items-center" *ngIf="totalPages$ | async as totalPages">
-   
-  
-    <!-- Buttons -->
-    <div class="inline-flex mt-2 xs:mt-0">
+  <!-- All Energy Summaries -->
+  <div *ngIf="allSummaries$ | async as summaries" class="mt-4 sm:mt-6">
+    <h3 class="text-lg sm:text-xl font-semibold text-gray-700 mb-2">All Energy Summaries</h3>
+    
+    <!-- Responsive Table with Horizontal Scroll on Mobile -->
+    <div class="overflow-x-auto rounded-lg border border-gray-300 shadow-md">
+      <table class="min-w-full bg-white">
+        <thead>
+          <tr class="bg-gray-200 text-gray-700">
+            <th class="py-2 px-3 sm:px-4 border text-left text-xs sm:text-sm">Device name</th>
+            <th class="py-2 px-3 sm:px-4 border text-left text-xs sm:text-sm">Date</th>
+            <th class="py-2 px-3 sm:px-4 border text-left text-xs sm:text-sm">Energy (kWh)</th>
+            <th class="py-2 px-3 sm:px-4 border text-left text-xs sm:text-sm">Alert Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of summaries" class="hover:bg-gray-100">
+            <td class="py-2 px-3 sm:px-4 border text-xs sm:text-sm">{{ item.device?.name }}</td>
+            <td class="py-2 px-3 sm:px-4 border text-xs sm:text-sm">{{ item.date }}</td>
+            <td class="py-2 px-3 sm:px-4 border text-xs sm:text-sm">{{ item.totalEnergyConsumption }}</td>
+            <td class="py-2 px-3 sm:px-4 border text-xs sm:text-sm">{{ item.alertCount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls - Responsive Layout -->
+    <div class="flex flex-col sm:flex-row sm:justify-between items-center mt-4" *ngIf="totalPages$ | async as totalPages">
+      <!-- Pagination Info - Order changes on mobile -->
+      <span class="text-xs sm:text-sm text-gray-700 order-2 sm:order-1 mt-2 sm:mt-0">
+        Showing 
+        <span class="font-semibold text-gray-900">{{ getStartIndex() + 1 }}</span> 
+        to 
+        <span class="font-semibold text-gray-900">{{ getEndIndex() }}</span> 
+        of 
+        <span class="font-semibold text-gray-900">{{ totalEntries }}</span> Entries
+      </span>
+      
+      <!-- Pagination Buttons -->
+      <div class="inline-flex order-1 sm:order-2">
         <button (click)="prevPage()" [disabled]="page === 0"
-          class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-emerald-500 rounded-s 
-                 hover:bg-emerald-600 disabled:opacity-50">
-            Prev
+          class="flex items-center justify-center px-3 sm:px-4 h-8 sm:h-10 text-sm font-medium text-white bg-emerald-500 rounded-l
+                hover:bg-emerald-600 disabled:opacity-50">
+          Prev
         </button>
         
         <button (click)="nextPage()" [disabled]="page === totalPages - 1"
-          class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-emerald-500 border-0 
-                 border-s border-emerald-600 rounded-e hover:bg-emerald-700 disabled:opacity-50">
-            Next
+          class="flex items-center justify-center px-3 sm:px-4 h-8 sm:h-10 text-sm font-medium text-white bg-emerald-500 border-0 
+                border-l border-emerald-600 rounded-r hover:bg-emerald-700 disabled:opacity-50">
+          Next
         </button>
-    </div> 
-    <!-- Help text -->
-    <span class="text-sm text-gray-700">
-        Showing 
-        <span class="font-semibold text-gray-900 ">{{ getStartIndex() + 1 }}</span> 
-        to 
-        <span class="font-semibold text-gray-900 ">{{ getEndIndex() }}</span> 
-        of 
-        <span class="font-semibold text-gray-900 ">{{ totalEntries }}</span> Entries
-    </span>
+      </div>
+    </div>
   </div>
-  
-
 </div>
 
-  </div>
-  

@@ -1,0 +1,6 @@
+
+`	java:S112e"FDefine and throw a dedicated exception instead of using a generic one.(ýª¾Ðüÿÿÿÿ
+u
+java:S1192?"ZDefine a constant instead of duplicating this literal "Threshold Alert not found" 3 times.(Ýî¤Ôúÿÿÿÿ
+h
+java:S6204:"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ª™¨¹
