@@ -11,7 +11,7 @@
         stage('Build') {
             steps {
                 // Fix: Ensure `mvnw` has executable permissions
-                sh 'chmod +x ./ecolyzer_backend/mvn'
+                // sh 'chmod +x ./ecolyzer_backend/mvnw'
                 // Use Maven to build the project
                 sh './ecolyzer_backend/mvn  clean package -DskipTests'
             }
