@@ -13,7 +13,7 @@
                 // Fix: Ensure `mvnw` has executable permissions
                 sh 'chmod +x ./ecolyzer_backend/mvnw'
                 // Use Maven to build the project
-                sh './mvnw clean package -DskipTests'
+                sh './ecolyzer_backend/mvnw clean package -DskipTests'
             }
         }
 
