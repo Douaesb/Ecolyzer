@@ -194,24 +194,29 @@
     <h2 class="text-xl font-semibold mb-4">
       {{ selectedDevice.id ? "Modifier" : "Ajouter" }} un appareil
     </h2>
+    <label class="ml-1 font-semibold" for="">Device Name</label>
     <input
       [(ngModel)]="selectedDevice.name"
       type="text"
       placeholder="Nom"
       class="w-full mb-3 p-2 border rounded"
     />
+    <label class="ml-1 font-semibold" for="">Serial Number</label>
     <input
       [(ngModel)]="selectedDevice.serialNum"
       type="number"
       placeholder="Numéro de série"
       class="w-full mb-3 p-2 border rounded"
     />
+    <label class="ml-1 font-semibold" for="">Energy Threshold</label>
+
     <input
       [(ngModel)]="selectedDevice.energyThreshold"
       type="number"
       placeholder="Seuil d'énergie"
       class="w-full mb-3 p-2 border rounded"
     />
+    <label class="ml-1 font-semibold" for="">Zone</label>
     <select
       [(ngModel)]="selectedDevice.zoneId"
       class="w-full mb-3 p-2 border rounded"

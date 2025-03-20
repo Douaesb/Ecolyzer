@@ -12,6 +12,7 @@ import com.ecolyzer.ecolyzer_backend.repository.StatusChangeRepository;
 import com.ecolyzer.ecolyzer_backend.repository.ThresholdAlertRepository;
 import com.ecolyzer.ecolyzer_backend.service.ThresholdAlertService;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -27,12 +28,15 @@ public class ThresholdAlertServiceImpl implements ThresholdAlertService {
     private final DeviceRepository deviceRepository;
     private final ThresholdAlertMapper thresholdAlertMapper;
     private final StatusChangeRepository statusChangeRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public ThresholdAlertServiceImpl(ThresholdAlertRepository thresholdAlertRepository, DeviceRepository deviceRepository, ThresholdAlertMapper thresholdAlertMapper, StatusChangeRepository statusChangeRepository) {
+
+    public ThresholdAlertServiceImpl(ThresholdAlertRepository thresholdAlertRepository, DeviceRepository deviceRepository, ThresholdAlertMapper thresholdAlertMapper, StatusChangeRepository statusChangeRepository, SimpMessagingTemplate messagingTemplate) {
         this.thresholdAlertRepository = thresholdAlertRepository;
         this.deviceRepository = deviceRepository;
         this.thresholdAlertMapper = thresholdAlertMapper;
         this.statusChangeRepository = statusChangeRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     public ThresholdAlertResponseDTO createThresholdAlert(ThresholdAlertRequestDTO requestDTO) {
@@ -80,6 +84,7 @@ public class ThresholdAlertServiceImpl implements ThresholdAlertService {
         statusChange.setThresholdAlert(alert);
         statusChange.setStatus(status);
         statusChange.setChangedAt(LocalDateTime.now());
+
         if (alert.getStatusHistory() == null) {
             alert.setStatusHistory(new ArrayList<>());
         }
@@ -90,9 +95,14 @@ public class ThresholdAlertServiceImpl implements ThresholdAlertService {
         if (status == AlertStatus.RESOLVED) {
             alert.setActive(false);
         }
+
         statusChangeRepository.save(statusChange);
         ThresholdAlert updatedAlert = thresholdAlertRepository.save(alert);
-        return thresholdAlertMapper.toResponseDTO(updatedAlert);
+
+        ThresholdAlertResponseDTO responseDTO = thresholdAlertMapper.toResponseDTO(updatedAlert);
+        messagingTemplate.convertAndSend("/topic/alerts", responseDTO);
+
+        return responseDTO;
     }
 
 

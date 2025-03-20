@@ -1,4 +1,4 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import {localStorageSync} from "ngrx-store-localstorage";
 import { routes } from './app.routes';
@@ -20,6 +20,9 @@ import { energyReducer } from './state/energy/energy-consumption.reducer';
 import { EnergyEffects } from './state/energy/energy-consumption.effects';
 import { dashboardReducer } from './state/dashboard/dashboard.reducer';
 import { DashboardEffects } from './state/dashboard/dashboard.effects';
+import { provideToastr } from 'ngx-toastr';
+import { BrowserModule } from '@angular/platform-browser';
+import { notificationReducer } from './state/notifications/notification.reducer';
 
 
 export function localStorageSyncReducer(reducer: any): any {
@@ -30,9 +33,11 @@ const metaReducers: MetaReducer[] = [localStorageSyncReducer];
 
 export const appConfig: ApplicationConfig = {
   providers: [provideRouter(routes),
-    provideStore({ auth: authReducer, users: userReducer, zones: zoneReducer , devices:  deviceReducer, thresholdAlert: thresholdAlertReducer, energy: energyReducer, dashboard: dashboardReducer}, { metaReducers }),
+    provideStore({ auth: authReducer, users: userReducer, zones: zoneReducer , devices:  deviceReducer, thresholdAlert: thresholdAlertReducer, energy: energyReducer, dashboard: dashboardReducer, notifications: notificationReducer}, { metaReducers }),
     provideEffects([AuthEffects, UserEffects, ZoneEffects, DeviceEffects, ThresholdAlertEffects, EnergyEffects, DashboardEffects]),
     provideHttpClient(withInterceptors([authInterceptor])),
+    importProvidersFrom(BrowserModule), 
+    provideToastr(),
   ],
   
   

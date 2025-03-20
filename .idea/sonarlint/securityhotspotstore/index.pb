@@ -142,3 +142,7 @@ Uecolyzer_backend/src/main/java/com/ecolyzer/ecolyzer_backend/service/ZoneServic
 Oecolyzer_backend/src/main/java/com/ecolyzer/ecolyzer_backend/model/Capteur.java,6\4\6493b4a8d50abc1bacb2020b9e4277daac44d64b
 š
 jecolyzer_backend/src/test/java/com/ecolyzer/ecolyzer_backend/service/EnergyConsumptionServiceImplTest.java,b\1\b1c6515d0e3bf221616470f8e0c6ecd53b7ef437
+š
+jecolyzer_backend/src/main/java/com/ecolyzer/ecolyzer_backend/service/rabbitmq/ThresholdAlertPublisher.java,a\2\a22fecc1f898f5993fa5d94031af3d93159e6124
+|
+Lecolyzer_backend/src/main/java/com/ecolyzer/ecolyzer_backend/model/User.java,d\a\dadf8b60bd9131e180302ef60cea32aa461447d0

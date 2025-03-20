@@ -17,6 +17,10 @@ public class RabbitMQConfig {
     public static final String SENSOR_EXCHANGE = "sensor.exchange";
     public static final String SENSOR_ROUTING_KEY = "sensor.data";
 
+    public static final String ALERT_QUEUE = "alert.queue";
+    public static final String ALERT_EXCHANGE = "alert.exchange";
+    public static final String ALERT_ROUTING_KEY = "alert.routing.key";
+
     private static final Logger logger = LoggerFactory.getLogger(RabbitMQConfig.class);
 
     @PostConstruct
@@ -37,6 +41,21 @@ public class RabbitMQConfig {
     @Bean
     public Binding binding(Queue queue, DirectExchange exchange) {
         return BindingBuilder.bind(queue).to(exchange).with(SENSOR_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue alertQueue() {
+        return new Queue(ALERT_QUEUE, true);
+    }
+
+    @Bean
+    public DirectExchange alertExchange() {
+        return new DirectExchange(ALERT_EXCHANGE);
+    }
+
+    @Bean
+    public Binding alertBinding(Queue alertQueue, DirectExchange alertExchange) {
+        return BindingBuilder.bind(alertQueue).to(alertExchange).with(ALERT_ROUTING_KEY);
     }
 
     @Bean

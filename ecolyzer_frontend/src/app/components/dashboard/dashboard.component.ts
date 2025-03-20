@@ -4,23 +4,26 @@ import { Observable, Subscription } from 'rxjs';
 import { EnergyDashboard } from '../../model/EnergyDashboard';
 import { loadDashboard } from '../../state/dashboard/dashboard.actions';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Chart } from 'chart.js';
 import { selectDashboardData, selectDashboardError, selectDashboardLoading } from '../../state/dashboard/dashboard.selectors';
 import { DashboardService } from '../../services/dashboard.service';
 import { WebSocketService } from '../../services/WebSocket.service';
+import { ThresholdAlert } from '../../model/threshold-alert.model';
+import { loadAlertsByDevice } from '../../state/threshold/threshold-alert.actions';
+import { OrderByDatePipe } from '../../pipes/order-by-date.pipe';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, OrderByDatePipe],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   dashboardData$: Observable<EnergyDashboard | null>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
-  
+  alerts: ThresholdAlert[] = [];
   dashboard!: EnergyDashboard;
   
   private energyChart: Chart | null = null;
@@ -35,7 +38,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private webSocketService: WebSocketService,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private router : Router
   ) {
     this.dashboardData$ = this.store.select(selectDashboardData);
     this.loading$ = this.store.select(selectDashboardLoading);
@@ -77,6 +81,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         console.error('WebSocket error:', error);
       }
     });
+
+    this.webSocketService.getAlerts().subscribe(alert => {
+      console.log('🚨 Nouvelle alerte:', alert);
+      this.alerts.unshift(alert); 
+    });
+
   }
 
   ngOnDestroy() {
@@ -277,4 +287,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.energyChart = null;
     }
   }
+
+   viewAlerts(deviceId: string): void {
+      console.log('Viewing alerts for device with ID:', deviceId);
+      this.store.dispatch(loadAlertsByDevice({ deviceId }));
+      this.router.navigate(['/alerts'], { queryParams: { deviceId } });
+    }
 }
