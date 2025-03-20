@@ -74,7 +74,9 @@ public class DashboardServiceImpl implements DashboardService {
                         alert.getAlertMessage(),       // Alert message
                         alert.isActive(),              // Whether the alert is active
                         alert.getStatus(),
-                        alert.getDevice().getName()
+                        alert.getDevice().getName(),
+                        alert.getDevice().getId(),
+                        alert.getTimestamp()
                 ))
                 .collect(Collectors.toList());
 

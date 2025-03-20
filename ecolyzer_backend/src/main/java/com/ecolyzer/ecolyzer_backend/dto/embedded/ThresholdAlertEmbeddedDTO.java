@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,4 +16,6 @@ public class ThresholdAlertEmbeddedDTO {
     private boolean active;
     private AlertStatus status;
     private String deviceName;
+    private String deviceId;
+    private LocalDateTime timestamp;
 }

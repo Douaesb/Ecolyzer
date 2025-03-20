@@ -15,8 +15,8 @@ import { User } from '../../model/user.model';
   templateUrl: './user-management.component.html',
 })
 export class UserManagementComponent implements OnInit {
-  allUsers$: Observable<User[]> = this.store.select(selectAllUsers);
-  users$: Observable<User[]> = this.store.select(selectUsersWithRoleUser);
+  users$: Observable<User[]> = this.store.select(selectAllUsers);
+  userss$: Observable<User[]> = this.store.select(selectUsersWithRoleUser);
 
   loading$: Observable<boolean> = this.store.select(selectUsersLoading);
   selectedUser: User | null = null;

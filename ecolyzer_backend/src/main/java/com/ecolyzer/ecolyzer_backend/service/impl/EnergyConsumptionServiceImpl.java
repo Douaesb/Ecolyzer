@@ -3,6 +3,7 @@ package com.ecolyzer.ecolyzer_backend.service.impl;
 import com.ecolyzer.ecolyzer_backend.model.*;
 import com.ecolyzer.ecolyzer_backend.repository.*;
 import com.ecolyzer.ecolyzer_backend.service.EnergyConsumptionService;
+import com.ecolyzer.ecolyzer_backend.service.rabbitmq.ThresholdAlertPublisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,9 +26,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private final EnergySummaryRepository energySummaryRepository;
     private final ThresholdAlertRepository thresholdAlertRepository;
     private final ZoneRepository zoneRepository;
+    private final ThresholdAlertPublisher alertPublisher;
 
 
-    public EnergyConsumptionServiceImpl(EnergyConsumptionRepository repository, CapteurRepository capteurRepository, SensorDataRepository sensorDataRepository, DeviceRepository deviceRepository, EnergySummaryRepository energySummaryRepository, ThresholdAlertRepository thresholdAlertRepository, ZoneRepository zoneRepository) {
+    public EnergyConsumptionServiceImpl(EnergyConsumptionRepository repository, CapteurRepository capteurRepository, SensorDataRepository sensorDataRepository, DeviceRepository deviceRepository, EnergySummaryRepository energySummaryRepository, ThresholdAlertRepository thresholdAlertRepository, ZoneRepository zoneRepository, ThresholdAlertPublisher alertPublisher) {
         this.repository = repository;
         this.capteurRepository = capteurRepository;
         this.sensorDataRepository = sensorDataRepository;
@@ -35,8 +37,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         this.energySummaryRepository = energySummaryRepository;
         this.thresholdAlertRepository = thresholdAlertRepository;
         this.zoneRepository = zoneRepository;
+        this.alertPublisher = alertPublisher;
     }
-
 
     @Scheduled(fixedRate = 10000) // Runs every 10 seconds
     @Transactional
@@ -119,31 +121,39 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     public void checkAndGenerateAlert(Device device, double newConsumption) {
-        Optional<ThresholdAlert> existingAlert = thresholdAlertRepository.findByDeviceIdAndActive(device.getId(), true);
+        Optional<ThresholdAlert> existingAlertOpt = thresholdAlertRepository.findByDeviceIdAndActive(device.getId(), true);
+        Double threshold = device.getEnergyThreshold();
 
-        if (device.getEnergyThreshold() != null && newConsumption >= device.getEnergyThreshold()) {
-            if (existingAlert.isEmpty()) {
-                ThresholdAlert alert = new ThresholdAlert();
-                alert.setDevice(device);
-                alert.setThresholdValue(device.getEnergyThreshold());
-                alert.setAlertMessage("⚠ Energy consumption exceeded the threshold!");
-                alert.setActive(true);
-                alert.setStatus(AlertStatus.UNRESOLVED);
-                alert.setTimestamp(LocalDateTime.now());
+        if (threshold != null) {
+            if (newConsumption >= threshold) {
+                if (existingAlertOpt.isEmpty()) {
+                    // 🚨 Generate a new alert
+                    ThresholdAlert alert = new ThresholdAlert();
+                    alert.setDevice(device);
+                    alert.setThresholdValue(threshold);
+                    alert.setAlertMessage("⚠ Energy consumption for " + device.getName() + " exceeded the threshold!");
+                    alert.setActive(true);
+                    alert.setStatus(AlertStatus.UNRESOLVED);
+                    alert.setTimestamp(LocalDateTime.now());
 
-                thresholdAlertRepository.save(alert);
-                log.warn("🚨 Alert generated for Device: {}, Threshold: {} kWh, Current: {} kWh",
-                        device.getId(), device.getEnergyThreshold(), newConsumption);
-            }
-        } else {
-            existingAlert.ifPresent(alert -> {
-                if (alert.getStatus() == AlertStatus.UNRESOLVED || alert.getStatus() == AlertStatus.RESOLVING) {
-                    alert.setStatus(AlertStatus.RESOLVED);
-                    alert.setActive(false);
                     thresholdAlertRepository.save(alert);
-                    log.info("✅ Alert resolved for Device: {}", device.getId());
+                    log.warn("🚨 Alert generated for Device: {}, Threshold: {} kWh, Current: {} kWh",
+                            device.getId(), threshold, newConsumption);
+
+                    alertPublisher.sendAlert(alert);
                 }
-            });
+            } else {
+                ThresholdAlert existingAlert = existingAlertOpt.get();
+                if (newConsumption < threshold) {
+                    // ✅ Reset alert tracking when consumption drops below threshold
+                    if (existingAlert.getStatus() == AlertStatus.UNRESOLVED || existingAlert.getStatus() == AlertStatus.RESOLVING) {
+                        existingAlert.setStatus(AlertStatus.RESOLVED);
+                        existingAlert.setActive(false);
+                        thresholdAlertRepository.save(existingAlert);
+                        log.info("✅ Alert resolved for Device: {} at {} kWh", device.getId(), newConsumption);
+                    }
+                }
+            }
         }
     }
 

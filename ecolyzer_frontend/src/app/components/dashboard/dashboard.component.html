@@ -50,22 +50,22 @@
 
           <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg p-3 shadow-md">
             <div class="text-white">
-              <h3 class="text-sm font-semibold opacity-90">Alertes Actifs</h3>
+              <h3 class="text-sm font-semibold opacity-90">Totale Alertes Actifs</h3>
               <p class="text-xl font-bold mt-1">{{ dashboard?.activeAlerts || 0 }}</p>
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mb-4">
+        <!-- <div class="grid grid-cols-2 gap-3 mb-4">
           <div class="bg-white rounded-lg p-3 shadow-md">
             <h3 class="text-sm font-semibold text-gray-800 mb-1">Devices Monitored</h3>
             <p class="text-xl font-bold text-primary-600">{{ deviceCount }}</p>
           </div>
           <div class="bg-white rounded-lg p-3 shadow-md">
-            <h3 class="text-sm font-semibold text-gray-800 mb-1">Alert Notifications</h3>
+            <h3 class="text-sm font-semibold text-gray-800 mb-1">Alert Count</h3>
             <p class="text-xl font-bold text-yellow-600">{{ alertCount }}</p>
           </div>
-        </div>
+        </div> -->
 
         <div class="bg-white rounded-lg p-3 shadow-md mb-4">
           <h2 class="text-lg font-semibold text-gray-800 mb-2">Energy Consumption Trend</h2>
@@ -99,25 +99,36 @@
               </table>
             </div>
           </div>
+          <!-- <div class="alerts">
+            <h3>⚡ Alertes en temps réel</h3>
+            <ul>
+              <li *ngFor="let alert of alerts">
+                <strong>{{ alert.alertMessage }}</strong> ({{ alert.timestamp }})
+              </li>
+            </ul>
+          </div> -->
 
           <!-- Alerts section -->
           <div class="bg-white rounded-lg p-3 shadow-md">
             <h2 class="text-lg font-semibold text-gray-800 mb-2">
-              État des alertes
+              Alertes actives 
             </h2>
             <div *ngIf="dashboard?.thresholdAlerts && dashboard.thresholdAlerts.length > 0" class="space-y-2">
-              <div
-                *ngFor="let alert of dashboard.thresholdAlerts"
-                class="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-              >
-                <div class="flex items-center space-x-3">
-                  <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                  <span class="font-medium text-gray-700 text-sm">{{ alert?.deviceName }}</span>
+          <ng-container *ngFor="let alert of dashboard.thresholdAlerts | orderByDate:'timestamp':'desc'">
+                <div
+                  *ngIf="alert?.status === 'UNRESOLVED' || alert?.status === 'RESOLVING'"
+                  class="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                >
+                  <div class="flex items-center space-x-3 cursor-pointer" (click)="viewAlerts(alert.deviceId)">
+                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                    <span class="font-medium text-gray-700 text-sm">{{ alert?.deviceName }}</span>
+                  </div>
+                  <span class="text-xs font-semibold text-red-600">
+                    {{ alert?.alertMessage || 'Alert Triggered' }}
+                  </span>
                 </div>
-                <span class="text-xs font-semibold text-red-600">
-                  {{ alert?.alertMessage || 'Alert Triggered' }}
-                </span>
-              </div>
+              </ng-container>
+              
             </div>
             <div *ngIf="!dashboard?.thresholdAlerts || dashboard.thresholdAlerts.length === 0" class="text-center p-2 text-sm text-gray-500">
               No active alerts
