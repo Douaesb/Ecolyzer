@@ -11,7 +11,10 @@
 /ecolyzer_backend/target
 /ecolyzer_backend/build
 /ecolyzer_backend/.mvn/
+!ecolyzer_backend/.mvn/wrapper/
 !ecolyzer_backend/.mvn/wrapper/maven-wrapper.jar
+!ecolyzer_backend/.mvn/wrapper/maven-wrapper.properties
+!ecolyzer_backend/.mvn/wrapper/MavenWrapperDownloader.java
 /ecolyzer_backend/nbproject/private/
 /ecolyzer_backend/nbbuild/
 /ecolyzer_backend/dist/
